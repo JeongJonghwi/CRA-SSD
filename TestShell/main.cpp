@@ -104,7 +104,7 @@ TEST(ShellTest, exitTest) {
 	string expected = "Exit TestShell";
 	string actual = ts.exit();
 
-	EXPECT_EQ(expectedm actual);
+	EXPECT_EQ(expected, actual);
 }
 
 TEST(ShellTest, fullWriteTest) {
@@ -127,7 +127,7 @@ TEST(ShellTest, fullReadTest) {
 		.Times(100)
 		.WillRepeatedly(Return("0x00000000"));
 
-	ts.fullWrite();
+	ts.fullRead();
 }
 
 int main(void) {
