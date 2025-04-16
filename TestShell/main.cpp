@@ -130,6 +130,48 @@ TEST(ShellTest, fullReadTest) {
 	ts.fullRead();
 }
 
+TEST(ShellTest, fullWriteAndReadCompare) {
+	EXPECT_CALL(ssd, read(_))
+		.Times(100);
+
+	uint32_t address = VALID_ADDRESS;
+	string value = VALID_VALUE;
+
+	string expected = "Done";
+	string actual = ts.fullWriteAndReadCompare(address, value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, partialLBAWriteTest) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(150);
+
+	EXPECT_CALL(ssd, read(_))
+		.Times(150);
+
+	string expected = "Done";
+	string actual = ts.partialLBAWrite(value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, writeReadAging) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(40);
+
+	EXPECT_CALL(ssd, read(_))
+		.Times(40);
+
+	string expected = "Done";
+	string actual = ts.writeReadAging(value);
+	EXPECT_EQ(expected, actual);
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
