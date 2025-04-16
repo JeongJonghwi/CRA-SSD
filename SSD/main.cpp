@@ -1,11 +1,17 @@
 #include "gmock/gmock.h"
+#include "ssd.h"
+#include <string>
+#include <stdexcept>
+
+using std::exception;
+using std::string;
 
 TEST(SSDTest, readSuccess) {
 	SSD ssd;
 	uint32_t lba = 0;
 	uint32_t expected = 0x00000000;
 
-	uint32_t actual = ssd.read(lba);
+	uint32_t actual = ssd.Read(lba);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -14,11 +20,11 @@ TEST(SSDTest, readFailWithInvalidLBA) {
 	uint32_t lba = 100;
 
 	try {
-		ssd.read(lba);
+		ssd.Read(lba);
 		FAIL();
 	}
 	catch (exception& e) {
-		EXPECT_EQ(string{ e.what() }, string{ "Out of LBA range" });
+		EXPECT_EQ(string{ e.what() }, string{ "ERROR" });
 	}
 }
 
