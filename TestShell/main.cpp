@@ -6,6 +6,8 @@ using namespace testing;
 
 const int VALID_ADDRESS = 3;
 const int INVALID_ADDRESS = 100;
+const string VALID_VALUE = "0x12345678";
+const string INVALID_VALUE = "0xTTTTFFFF";
 
 class MockSSD : public SSD {
 public:
@@ -44,7 +46,7 @@ TEST(ShellTest, writeSuccess) {
 		.Times(1);
 
 	uint32_t address = VALID_ADDRESS;
-	string value = "0x12345678";
+	string value = VALID_VALUE;
 	string expected = "Done";
 	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
@@ -58,7 +60,7 @@ TEST(ShellTest, writeFailWithInvalidLBA) {
 		.Times(0);
 
 	uint32_t address = INVALID_ADDRESS;
-	string value = "0x12345678";
+	string value = VALID_VALUE;
 	string expected = "ERROR";
 	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
@@ -72,7 +74,7 @@ TEST(ShellTest, writeFailWithInvalidValue) {
 		.Times(0);
 
 	uint32_t address = VALID_ADDRESS;
-	string value = "0xTTTTFFFF";
+	string value = INVALID_VALUE;
 	string expected = "ERROR";
 	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
