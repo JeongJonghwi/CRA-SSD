@@ -4,6 +4,9 @@
 
 using namespace testing;
 
+const int VALID_ADDRESS = 3;
+const int INVALID_ADDRESS = 100;
+
 class MockSSD : public SSD {
 public:
 	MOCK_METHOD(string, read, (uint32_t address), (override));
@@ -13,7 +16,7 @@ public:
 TEST(ShellTest, readSuccess) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
-	uint32_t address = 3;
+	uint32_t address = VALID_ADDRESS;
 
 	EXPECT_CALL(ssd, read(_))
 		.Times(1)
@@ -28,7 +31,7 @@ TEST(ShellTest, readSuccess) {
 TEST(ShellTest, readFailWithInvalidLBA) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
-	uint32_t address = 100;
+	uint32_t address = INVALID_ADDRESS;
 
 	EXPECT_EQ("ERROR", ts.read(address));
 }
