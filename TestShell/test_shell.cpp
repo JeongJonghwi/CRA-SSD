@@ -36,7 +36,7 @@ public:
 
 	string fullWrite(string value) {
 		if (!isValidValue(value)) return "ERROR";
-		for (int i = 0; i < 100; i++) {
+		for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
 			ssd->write(i, value);
 		}
 		return "Done";
@@ -44,7 +44,7 @@ public:
 
 	string fullRead() {
 		string ret = "";
-		for (int i = 0; i < 100; i++) {
+		for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
 			ret += ssd->read(i); 
 			ret += "\n";
 		}
@@ -52,6 +52,8 @@ public:
 	}
 private:
 	SSD* ssd;
+	const int SSD_MINIMUM_ADDRESS = 0;
+	const int SSD_MAXIMUM_ADDRESS = 100;
 
 	bool isValidAddress(uint32_t address) {
 		if (address > 99 || address < 0) return false;
