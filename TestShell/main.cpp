@@ -1,45 +1,36 @@
 #include "gmock/gmock.h"
+#include "interface.h"
+#include "test_shell.cpp"
 
-#define interface struct
-interface SSD {
-public:
-	virtual uint32_t read(uint32_t address) = 0;
-	virtual void write(uint32_t address, uint32_t value) = 0;
-};
+using namespace testing;
 
-class MockSSD : public testing::Test {
+class MockSSD : public SSD {
 public:
-	MOCK_METHOD(uint32_t, read, (uint32_t address), (override));
+	MOCK_METHOD(string, read, (uint32_t address), (override));
 	MOCK_METHOD(void, write, (uint32_t address, uint32_t value), (override));
 };
 
 TEST(ShellTest, readSuccess) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
-	uint32_t address;
+	uint32_t address = 3;
 
 	EXPECT_CALL(ssd, read(_))
 		.Times(1)
-		.WillRepeatedly(Return(0x00000000));
-
-	uint32_t expected = 0x00000000;
-	uint32_t actual = ts.read();
+		.WillRepeatedly(Return("0x10000000"));
+	
+	string expected = "0x10000000";
+	string actual = ts.read(address);
 
 	EXPECT_EQ(expected, actual);
 }
 
 TEST(ShellTest, readFailWithInvalidLBA) {
-	TestShell ts;
 	MockSSD ssd;
-	uint32_t address;
+	TestShell ts{ &ssd };
+	uint32_t address = 100;
 
-	try {
-		ts.read(address);
-		FAIL();
-	}
-	catch (exception& e) {
-		EXPECT_EQ(string{ e.what() }, string{ "Out of LBA Range" });
-	}
+	EXPECT_EQ("ERROR", ts.read(address));
 }
 
 int main(void) {
