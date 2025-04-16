@@ -80,6 +80,56 @@ TEST(ShellTest, writeFailWithInvalidValue) {
 	EXPECT_EQ(expected, actual);
 }
 
+TEST(ShellTest, helpTest) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	string expected = "Team CodeCraft: ";
+	expected += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
+	expected += "write: write {value} to {address}\n";
+	expected += "read: read from {address}\n";
+	expected += "fullwrite: write {value} to 0x0 ~ 0x100\n";
+	expected += "fullread: read from all 0x0 ~ 0x100\n";
+	expected += "help: print this message\n";
+	expected += "exit: exit TestShell\n";
+	string actual = ts.help();
+
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, exitTest) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	string expected = "Exit TestShell";
+	string actual = ts.exit();
+
+	EXPECT_EQ(expectedm actual);
+}
+
+TEST(ShellTest, fullWriteTest) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(100);
+
+	string value = VALID_VALUE;
+
+	ts.fullWrite(value);
+}
+
+TEST(ShellTest, fullReadTest) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, read(_))
+		.Times(100)
+		.WillRepeatedly(Return("0x00000000"));
+
+	ts.fullWrite();
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
