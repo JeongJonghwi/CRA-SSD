@@ -10,7 +10,7 @@ const int INVALID_ADDRESS = 100;
 class MockSSD : public SSD {
 public:
 	MOCK_METHOD(string, read, (uint32_t address), (override));
-	MOCK_METHOD(void, write, (uint32_t address, uint32_t value), (override));
+	MOCK_METHOD(void, write, (uint32_t address, string value), (override));
 };
 
 TEST(ShellTest, readSuccess) {
@@ -43,10 +43,10 @@ TEST(ShellTest, writeSuccess) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(1);
 
-	uint32_t address = 1;
+	uint32_t address = VALID_ADDRESS;
 	string value = "0x12345678";
-	int expected = 0;
-	int actual = ts.write(address, value);
+	string expected = "Done";
+	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -54,10 +54,13 @@ TEST(ShellTest, writeFailWithInvalidLBA) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
 
-	uint32_t address = 100;
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(0);
+
+	uint32_t address = INVALID_ADDRESS;
 	string value = "0x12345678";
-	int expected = 1;
-	int actual = ts.write(address, value);
+	string expected = "ERROR";
+	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -65,10 +68,13 @@ TEST(ShellTest, writeFailWithInvalidValue) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
 
-	uint32_t address = 1;
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(0);
+
+	uint32_t address = VALID_ADDRESS;
 	string value = "0xTTTTFFFF";
-	int expected = 1;
-	int actual = ts.write(address, value);
+	string expected = "ERROR";
+	string actual = ts.write(address, value);
 	EXPECT_EQ(expected, actual);
 }
 
