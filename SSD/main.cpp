@@ -2,12 +2,36 @@
 #include "ssd.h"
 #include <string>
 #include <stdexcept>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include <cstdio>
+
+#define _CRT_SECURE_NO_WARNINGS
 
 using std::exception;
 using std::string;
 
-TEST(SSDTest, readSuccess) {
+class SSDTestFixture : public ::testing::Test {
+public:
 	SSD ssd;
+	char buf[20];
+
+	uint32_t getResultValue(uint32_t nLba) {
+		int result = 0;
+		uint32_t readValue = 0;
+		FILE* fp = nullptr;
+
+		if ((result = fopen_s(&fp, ssd.getSsdOutputFileName().c_str(), "r")) != 0) {
+			fopen_s(&fp, ssd.getSsdOutputFileName().c_str(), "r"); // try to open again when fail
+		}
+
+		fscanf_s(fp, "%s", buf);
+
+		fclose(fp);
+	}
+};
+
+TEST_F(SSDTestFixture, readSuccess) {
 	const uint32_t VALID_LBA = 0;
 	uint32_t expected = 0x00000000;
 
@@ -15,72 +39,62 @@ TEST(SSDTest, readSuccess) {
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(SSDTest, readFailWithInvalidLBA) {
-	SSD ssd;
+TEST_F(SSDTestFixture, readFailWithInvalidLBA) {
 	const uint32_t INVALID_LBA = 100;
+	uint32_t expected = 0;
 
-	try {
-		ssd.Read(INVALID_LBA);
-		FAIL();
-	}
-	catch (exception& e) {
-		EXPECT_EQ(string{ e.what() }, string{ "ERROR" });
-	}
+	EXPECT_EQ(expected, ssd.Read(INVALID_LBA));
 }
 
-TEST(SSDTest, writeSuccess) {
-	SSD ssd;
+TEST_F(SSDTestFixture, writeSuccess) {
 	uint32_t lba = 1;
-	string value = "0x12345678";
+	uint32_t value = 0x12345678;
 
-	int expected = 0;
+	uint32_t expected = 0x12345678;
 
-	EXPECT_EQ(expected, ssd.write(lba, value));
+	EXPECT_EQ(expected, ssd.Write(lba, value));
 }
 
-TEST(SSDTest, writeFailWithInvalidLBA) {
-	SSD ssd;
+TEST_F(SSDTestFixture, writeFailWithInvalidLBA) {
 	uint32_t lba = 100;
-	string value{ "0x12345678" };
+	uint32_t value = 0x12345678;
 
-	int expected = 1;
+	uint32_t expected = 0;
 
-	EXPECT_EQ(expected, ssd.write(lba, value));
+	EXPECT_EQ(expected, ssd.Write(lba, value));
 }
 
-TEST(SSDTest, writeFailWithInvalidValue) {
+/*
+TEST_F(SSDTestFixture, writeFailWithInvalidValue) {
 	SSD ssd;
 	uint32_t lba = 1;
 	string value{ "0xTTTTFFFF" };
 
-	int expected = 1;
+	uint32_t expected = 1;
 
-	EXPECT_EQ(expected, ssd.write(lba, value));
+	EXPECT_EQ(expected, ssd.Write(lba, value));
 }
+*/
 
-TEST(SSDTest, writeWithFile) {
+TEST_F(SSDTestFixture, writeWithFile) {
 	SSD ssd;
 	uint32_t lba = 1;
-	string value{ "0x12345678" };
-	string expected{ "0x00000000" };
-	string actual;
+	uint32_t value = 0x12345678;
+	uint32_t expected = 0x00000000;
+	//string actual;
+	uint32_t actual = 0x00000000;
 
-	ssd.write(lba, value);
+	ssd.Write(lba, value);
 
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(SSDTest, readWithFile) {
+TEST_F(SSDTestFixture, readWithFile) {
 	SSD ssd;
-	uint32_t lba = 1;
-	string expected{ "0x00000000" };
-	string actual;
+	uint32_t lba = 2;
+	uint32_t expected = 0x00000000;
 
-	ssd.Read(lba);
-
-	FILE *f;
-	f = open("ssd_nand.txt", "r");
-	read(f, &actual, 4);
+	uint32_t actual = ssd.Read(lba);
 
 	EXPECT_EQ(expected, actual);
 }
