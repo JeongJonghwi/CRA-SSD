@@ -58,6 +58,33 @@ TEST(SSDTest, writeFailWithInvalidValue) {
 	EXPECT_EQ(expected, ssd.write(lba, value));
 }
 
+TEST(SSDTest, writeWithFile) {
+	SSD ssd;
+	uint32_t lba = 1;
+	string value{ "0x12345678" };
+	string expected{ "0x00000000" };
+	string actual;
+
+	ssd.write(lba, value);
+
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, readWithFile) {
+	SSD ssd;
+	uint32_t lba = 1;
+	string expected{ "0x00000000" };
+	string actual;
+
+	ssd.Read(lba);
+
+	FILE *f;
+	f = open("ssd_nand.txt", "r");
+	read(f, &actual, 4);
+
+	EXPECT_EQ(expected, actual);
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
