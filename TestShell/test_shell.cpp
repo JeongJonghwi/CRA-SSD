@@ -1,13 +1,6 @@
 #include "interface.h"
 #include "gmock/gmock.h"
 
-class CMD {
-public :
-
-private:
-	string input;
-};
-
 class TestShell {
 public:
 	TestShell(SSD* ssd) : ssd(ssd) {}
