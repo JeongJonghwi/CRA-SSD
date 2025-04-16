@@ -8,19 +8,19 @@ using std::string;
 
 TEST(SSDTest, readSuccess) {
 	SSD ssd;
-	uint32_t lba = 0;
+	const uint32_t VALID_LBA = 0;
 	uint32_t expected = 0x00000000;
 
-	uint32_t actual = ssd.Read(lba);
+	uint32_t actual = ssd.Read(VALID_LBA);
 	EXPECT_EQ(expected, actual);
 }
 
 TEST(SSDTest, readFailWithInvalidLBA) {
 	SSD ssd;
-	uint32_t lba = 100;
+	const uint32_t INVALID_LBA = 100;
 
 	try {
-		ssd.Read(lba);
+		ssd.Read(INVALID_LBA);
 		FAIL();
 	}
 	catch (exception& e) {
