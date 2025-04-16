@@ -107,6 +107,114 @@ TEST_F(SSDTestFixture, readWithFile) {
 	EXPECT_EQ(expected, actual);
 }
 
+TEST(SSDTest, checkArgumentRead) {
+	int argc = 3;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[1] = "R";
+	argv[2] = "1";
+
+	bool expected = true;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+	EXPECT_EQ(1, lba);
+}
+
+TEST(SSDTest, checkArgumentWrite) {
+	int argc = 3;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[1] = "W";
+	argv[2] = "1";
+	argv[3] = "0x12345678";
+
+	bool expected = true;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+	EXPECT_EQ(1, lba);
+	EXPECT_EQ(0x12345678, value);
+}
+
+TEST(SSDTest, invalidArgumentsCountTest1) {
+	int argc = 2;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, invalidArgumentsCountTest2) {
+	int argc = 3;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[1] = "W"; // write need totally 4 arguments
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, invalidArgumentsCountTest3) {
+	int argc = 4;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[1] = "R"; // read need totally 3 arguments
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, invalidOperationTest) {
+	int argc = 3;
+	char* argv[3];
+	uint32_t lba;
+	uint32_t value;
+
+	argv[1] = "C"; // not R or W
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, invalidAddressRangeTest) {
+	int argc = 2;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[2] = "100"; // LBA Range must in 0-99
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(SSDTest, invalidValueTest) {
+	int argc = 4;
+	char** argv;
+	uint32_t lba;
+	uint32_t value;
+
+	argv[3] = "0xTTTTFFFF"; // LBA Range must in 0-99
+
+	bool expected = false;
+	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	EXPECT_EQ(expected, actual);
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
