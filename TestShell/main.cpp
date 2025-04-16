@@ -36,6 +36,42 @@ TEST(ShellTest, readFailWithInvalidLBA) {
 	EXPECT_EQ("ERROR", ts.read(address));
 }
 
+TEST(ShellTest, writeSuccess) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, write(_, _))
+		.Times(1);
+
+	uint32_t address = 1;
+	string value = "0x12345678";
+	int expected = 0;
+	int actual = ts.write(address, value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, writeFailWithInvalidLBA) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	uint32_t address = 100;
+	string value = "0x12345678";
+	int expected = 1;
+	int actual = ts.write(address, value);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, writeFailWithInvalidValue) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	uint32_t address = 1;
+	string value = "0xTTTTFFFF";
+	int expected = 1;
+	int actual = ts.write(address, value);
+	EXPECT_EQ(expected, actual);
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
