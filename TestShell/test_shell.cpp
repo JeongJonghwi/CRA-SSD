@@ -17,6 +17,39 @@ public:
 		ssd->write(address, value);
 		return "Done";
 	}
+
+	string help() {
+		string ret = "Team CodeCraft: ";
+		ret += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
+		ret += "write: write {value} to {address}\n";
+		ret += "read: read from {address}\n";
+		ret += "fullwrite: write {value} to 0x0 ~ 0x100\n";
+		ret += "fullread: read from all 0x0 ~ 0x100\n";
+		ret += "help: print this message\n";
+		ret += "exit: exit TestShell\n";
+		return ret;
+	}
+
+	string exit() {
+		return "Exit TestShell";
+	}
+
+	string fullWrite(string value) {
+		if (!isValidValue(value)) return "ERROR";
+		for (int i = 0; i < 100; i++) {
+			ssd->write(i, value);
+		}
+		return "Done";
+	}
+
+	string fullRead() {
+		string ret = "";
+		for (int i = 0; i < 100; i++) {
+			ret += ssd->read(i); 
+			ret += "\n";
+		}
+		return ret;
+	}
 private:
 	SSD* ssd;
 
