@@ -6,5 +6,5 @@ using std::string;
 interface SSD{
 public:
 	virtual string read(uint32_t address) = 0;
-	virtual void write(uint32_t address, uint32_t value) = 0;
+	virtual void write(uint32_t address, string value) = 0;
 };
