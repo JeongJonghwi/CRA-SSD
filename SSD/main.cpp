@@ -28,6 +28,36 @@ TEST(SSDTest, readFailWithInvalidLBA) {
 	}
 }
 
+TEST(SSDTest, writeSuccess) {
+	SSD ssd;
+	uint32_t lba = 1;
+	string value = "0x12345678";
+
+	int expected = 0;
+
+	EXPECT_EQ(expected, ssd.write(lba, value));
+}
+
+TEST(SSDTest, writeFailWithInvalidLBA) {
+	SSD ssd;
+	uint32_t lba = 100;
+	string value = "0x12345678";
+
+	int expected = 1;
+
+	EXPECT_EQ(expected, ssd.write(lba, value));
+}
+
+TEST(SSDTest, writeFailWithInvalidValue) {
+	SSD ssd;
+	uint32_t lba = 1;
+	string value = "0xTTTTFFFF";
+
+	int expected = 1;
+
+	EXPECT_EQ(expected, ssd.write(lba, value));
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
