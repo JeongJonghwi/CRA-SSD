@@ -1,7 +1,7 @@
 #include <vector>
-
 #include "interface.h"
 #include "gmock/gmock.h"
+#include "cmd.cpp"
 
 class TestShell {
 public:
@@ -107,6 +107,11 @@ public:
 		}
 
 		return "PASS";
+	}
+
+	bool isValidCommandAndArgument(string command) {
+		CMD cmd;
+		return cmd.validCheck(command);
 	}
 
 private:
