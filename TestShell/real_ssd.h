@@ -5,8 +5,11 @@
 class RealSSD : public SSD {
 
 public:
+	RealSSD() {
+		exeDir = getExecutablePath();
+	}
+
 	string read(uint32_t address) {
-		std::string exeDir = getExecutablePath();
 		std::string command = exeDir + "/SSD.exe R " + std::to_string(address);
 
 		FILE* pipe = _popen(command.c_str(), "r");
@@ -34,7 +37,6 @@ public:
 	}
 
 	void write(uint32_t address, string value) {
-		std::string exeDir = getExecutablePath();
 		std::string command = exeDir + "/SSD.exe W " + std::to_string(address) + " " + value;
 		FILE* pipe = _popen(command.c_str(), "r");
 		if (pipe) {
@@ -43,6 +45,7 @@ public:
 	}
 
 private:
+	std::string exeDir;
 
 	std::string getExecutablePath() {
 		char path[MAX_PATH];
