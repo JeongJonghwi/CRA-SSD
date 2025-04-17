@@ -16,75 +16,73 @@ public:
 	MOCK_METHOD(void, write, (uint32_t address, string value), (override));
 };
 
-TEST(ShellTest, readSuccess) {
+class TestFixture : public Test {
+public:
 	MockSSD ssd;
 	TestShell ts{ &ssd };
-	uint32_t address = VALID_ADDRESS;
+};
 
+class SSDFixture : public Test {
+public:
+	RealSSD ssd;
+	TestShell ts{ &ssd };
+};
+
+class ShellTestFixture : public TestFixture {};
+class ShellTestScriptFixture : public TestFixture {};
+class InvalidCMDTestFixture : public TestFixture {
+public:
+	void validNotOkay(string command) {
+		EXPECT_FALSE(ts.isValidCommandAndArgument(command));
+	}
+	void validOkay(string command) {
+		EXPECT_TRUE(ts.isValidCommandAndArgument(command));
+	}
+};
+
+TEST_F(ShellTestFixture, readSuccess) {
 	EXPECT_CALL(ssd, read(_))
 		.Times(1)
 		.WillRepeatedly(Return("0x10000000"));
 	
 	string expected = "0x10000000";
-	string actual = ts.read(address);
+	string actual = ts.read(VALID_ADDRESS);
 
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, readFailWithInvalidLBA) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-	uint32_t address = INVALID_ADDRESS;
-
-	EXPECT_EQ("ERROR", ts.read(address));
+TEST_F(ShellTestFixture, readFailWithInvalidLBA) {
+	EXPECT_EQ("ERROR", ts.read(INVALID_ADDRESS));
 }
 
-TEST(ShellTest, writeSuccess) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, writeSuccess) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(1);
 
-	uint32_t address = VALID_ADDRESS;
-	string value = VALID_VALUE;
 	string expected = "Done";
-	string actual = ts.write(address, value);
+	string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, writeFailWithInvalidLBA) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, writeFailWithInvalidLBA) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(0);
 
-	uint32_t address = INVALID_ADDRESS;
-	string value = VALID_VALUE;
 	string expected = "ERROR";
-	string actual = ts.write(address, value);
-	EXPECT_EQ(expected, actual);
+	string actual = ts.write(INVALID_ADDRESS, VALID_VALUE);
+	EXPECT_EQ("ERROR", ts.write(INVALID_ADDRESS, VALID_VALUE));
 }
 
-TEST(ShellTest, writeFailWithInvalidValue) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, writeFailWithInvalidValue) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(0);
 
-	uint32_t address = VALID_ADDRESS;
-	string value = INVALID_VALUE;
 	string expected = "ERROR";
-	string actual = ts.write(address, value);
+	string actual = ts.write(VALID_ADDRESS, INVALID_VALUE);
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, helpTest) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, helpTest) {
 	string expected = "Team CodeCraft: ";
 	expected += "°­µ¿Çö, ±èÅÂ¿Ï, À¯Çö½Â, ÀÌ¼öÁö, Á¤Á¾ÈÖ\n";
 	expected += "write: write {value} to {address}\n";
@@ -93,37 +91,21 @@ TEST(ShellTest, helpTest) {
 	expected += "fullread: read from all 0x0 ~ 0x100\n";
 	expected += "help: print this message\n";
 	expected += "exit: exit TestShell\n";
-	string actual = ts.help();
 
-	EXPECT_EQ(expected, actual);
+	EXPECT_EQ(expected, ts.help());
 }
 
-TEST(ShellTest, exitTest) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	string expected = "Exit TestShell";
-	string actual = ts.exit();
-
-	EXPECT_EQ(expected, actual);
+TEST_F(ShellTestFixture, exitTest) {
+	EXPECT_EQ("Exit TestShell", ts.exit());
 }
 
-TEST(ShellTest, fullWriteTest) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, fullWriteTest) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(100);
-
-	string value = VALID_VALUE;
-
-	ts.fullWrite(value);
+	ts.fullWrite(VALID_VALUE);
 }
 
-TEST(ShellTest, fullReadTest) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestFixture, fullReadTest) {
 	EXPECT_CALL(ssd, read(_))
 		.Times(100)
 		.WillRepeatedly(Return("0x00000000"));
@@ -131,10 +113,7 @@ TEST(ShellTest, fullReadTest) {
 	ts.fullRead();
 }
 
-TEST(ShellTest, groupWriteAndReadCompare) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
+TEST_F(ShellTestScriptFixture, groupWriteAndReadCompare) {
 	EXPECT_CALL(ssd, write(_,_)).Times(5);
 	EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return(VALID_VALUE));
 	
@@ -143,11 +122,7 @@ TEST(ShellTest, groupWriteAndReadCompare) {
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, partialLBAWriteTest) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-	string value = VALID_VALUE;
-
+TEST_F(ShellTestScriptFixture, partialLBAWriteTest) {
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(150);
 
@@ -156,15 +131,11 @@ TEST(ShellTest, partialLBAWriteTest) {
 		.WillRepeatedly(Return(VALID_VALUE));
 
 	string expected = "PASS";
-	string actual = ts.partialLBAWrite(value);
+	string actual = ts.partialLBAWrite(VALID_VALUE);
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, writeReadAging) {
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-	string value = VALID_VALUE;
-	
+TEST_F(ShellTestScriptFixture, writeReadAging) {
 	EXPECT_CALL(ssd, read(0))
 		.Times(200)
 		.WillRepeatedly(Return(VALID_VALUE));
@@ -172,225 +143,109 @@ TEST(ShellTest, writeReadAging) {
 		.Times(200)
 		.WillRepeatedly(Return(VALID_VALUE));
 
-	EXPECT_CALL(ssd, write(0, _))
-		.Times(200);
-	EXPECT_CALL(ssd, write(99, _))
-		.Times(200);
+	EXPECT_CALL(ssd, write(0, _)).Times(200);
+	EXPECT_CALL(ssd, write(99, _)).Times(200);
 
 	string expected = "PASS";
-	string actual = ts.writeReadAging(value);
+	string actual = ts.writeReadAging(VALID_VALUE);
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, invalidCommandTest) {
-	string command = "readAfterWrite";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidCommandTest) {
+	validNotOkay("readAfterWrite");
 }
 
-TEST(ShellTest, invalidReadArgumentCount) {
-	string command = "read 3 " + VALID_VALUE;
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidReadArgumentCount) {
+	validNotOkay ("read 3 " + VALID_VALUE);
 }
 
 
-TEST(ShellTest, invalidWriteArgumentCount) {
-	string command = "write 50 ";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidWriteArgumentCount) {
+	validNotOkay("write 50 ");
 }
 
-TEST(ShellTest, invalidWriteLba) {
-	string command = "write 100 " + VALID_VALUE;
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidWriteLba) {
+	validNotOkay("write 100 " + VALID_VALUE);
 }
 
-TEST(ShellTest, invalidHelpArgumentCount) {
-	string command = "help help";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidHelpArgumentCount) {
+	validNotOkay("help help");
 }
 
-TEST(ShellTest, invalidExitArgumentCount) {
-	string command = "exi t";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidExitArgumentCount) {
+	validNotOkay("exi t");
 }
 
-TEST(ShellTest, invalidFullReadArgumentCount) {
-	string command = "fullread 3 " + VALID_VALUE;
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidFullReadArgumentCount) {
+	validNotOkay("fullread 3 " + VALID_VALUE);
 }
 
-TEST(ShellTest, invalidFullWriteArgumentCount) {
-	string command = "full write " + VALID_VALUE;
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, invalidFullWriteArgumentCount) {
+	validNotOkay("full write " + VALID_VALUE);
 }
 
 
-TEST(ShellTest, fullWriteFailWithInvalidValue) {
-	string command = "fullwrite " + INVALID_VALUE;
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, fullWriteFailWithInvalidValue) {
+	validNotOkay("fullwrite " + INVALID_VALUE);
 }
 
-TEST(ShellTest, TestCase1_WorkTest) {
-	string command = "1_";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase1_WorkTest) {
+	validOkay("1_");
 }
 
-TEST(ShellTest, TestCase1_DoNotWorkTest) {
-	string command = "1_dd";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase1_DoNotWorkTest) {
+	validNotOkay("1_dd");
 }
 
-TEST(ShellTest, TestCase1_FullWorkTest) {
-	string command = "1_FullWriteAndReadCompare";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase1_FullWorkTest) {
+	validOkay("1_FullWriteAndReadCompare");
 }
 
-TEST(ShellTest, TestCase1_FullDoNotWorkTest) {
-	string command = "1_FullWriteAndReadComparedd";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase1_FullDoNotWorkTest) {
+	validNotOkay("1_FullWriteAndReadComparedd");
 }
 
-TEST(ShellTest, TestCase2_WorkTest) {
-	string command = "2_";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase2_WorkTest) {
+	validOkay("2_");
 }
 
-TEST(ShellTest, TestCase2_DoNotWorkTest) {
-	string command = "2_dasdfasdfd";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase2_DoNotWorkTest) {
+	validNotOkay("2_dasdfasdfd");
 }
 
-TEST(ShellTest, TestCase2_FullWorkTest) {
-	string command = "2_PartialLBAWrite";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase2_FullWorkTest) {
+	validOkay("2_PartialLBAWrite");
 }
 
-TEST(ShellTest, TestCase2_FullDoNotWorkTest) {
-	string command = "2_PartialLBAWrited";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase2_FullDoNotWorkTest) {
+	validNotOkay("2_PartialLBAWrited");;
 }
 
-TEST(ShellTest, TestCase3_WorkTest) {
-	string command = "3_";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase3_WorkTest) {
+	validOkay("3_");
 }
 
-TEST(ShellTest, TestCase3_DoNotWorkTest) {
-	string command = "3_;";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
+TEST_F(InvalidCMDTestFixture, TestCase3_DoNotWorkTest) {
+	validNotOkay("3_;");
 
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
 }
 
-TEST(ShellTest, TestCase3_FullWorkTest) {
-	string command = "3_WriteReadAging";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_TRUE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase3_FullWorkTest) {
+	validOkay("3_WriteReadAging");
 }
 
-TEST(ShellTest, TestCase3_FullDoNotWorkTest) {
-	string command = "3_WriteReadAginged";
-	MockSSD ssd;
-	TestShell ts{ &ssd };
-
-	bool actual = ts.isValidCommandAndArgument(command);
-	EXPECT_FALSE(actual);
+TEST_F(InvalidCMDTestFixture, TestCase3_FullDoNotWorkTest) {
+	validNotOkay("3_WriteReadAginged");
 }
 
-TEST(ShellTest, readWithRealSSDNoOutput) {
-
-	RealSSD ssd;
-	TestShell ts(&ssd);
-	uint32_t lba = VALID_ADDRESS;
-
+TEST_F(SSDFixture, readWithRealSSDNoOutput) {
 	string expected = "0x00000000";
 	string actual = ts.read(VALID_ADDRESS);
 
 	EXPECT_EQ(expected, actual);
 }
 
-TEST(ShellTest, writeWithRealSSD) {
-	RealSSD ssd;
-	TestShell ts(&ssd);
-	uint32_t lba = VALID_ADDRESS;
-	string value = VALID_VALUE;
-
+TEST_F(SSDFixture, writeWithRealSSD) {
 	string expected = "Done";
 	string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
 
