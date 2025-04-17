@@ -135,7 +135,8 @@ private:
 			return false;
 
 		for (int i = 2; i < 10; i++) {
-			if ((value[i] >= '0' && value[i] <= '9') || (value[i] >= 'A' && value[i] <= 'F')) continue;
+			if ((value[i] >= '0' && value[i] <= '9') || (value[i] >= 'A' && value[i] <= 'F') ||
+				(value[i] >= 'a' && value[i] <= 'f')) continue;
 			return false;
 		}
 

@@ -3,6 +3,7 @@
 #include "test_shell.cpp"
 #include "real_ssd.h"
 
+#if _DEBUG
 using namespace testing;
 
 const int VALID_ADDRESS = 3;
@@ -253,7 +254,13 @@ TEST_F(SSDFixture, writeWithRealSSD) {
 }
 
 int main(void) {
+	::testing::InitGoogleMock();
+	return RUN_ALL_TESTS();
+}
 
+#else
+int main(void) {
+	
 	RealSSD ssd;
 	TestShell test_shell(&ssd);
 
@@ -266,17 +273,17 @@ int main(void) {
 		if (cmd.validCheck(input)) {
 			string command = cmd.getCommand();
 
-			if (command == "read") {
+			if (command == "read") { 
 				std::cout << test_shell.read(cmd.getAddress()) << std::endl;
 			}
 			else if (command == "write") {
-				test_shell.write(cmd.getAddress(), cmd.getValue());
+				std::cout << test_shell.write(cmd.getAddress(), cmd.getValue()) << std::endl;
 			}
 			else if (command == "fullread") {
 				std::cout << test_shell.fullRead() << std::endl;
 			}
 			else if (command == "fullwrite") {
-				test_shell.fullWrite(cmd.getValue());
+				std::cout << test_shell.fullWrite(cmd.getValue()) << std::endl;
 			}
 			else if (command == "help") {
 				std::cout << test_shell.help() << std::endl;
@@ -297,7 +304,5 @@ int main(void) {
 		else
 			std::cout << "INVALID COMMAND" << std::endl;
 	}
-	
-	::testing::InitGoogleMock();
-	return RUN_ALL_TESTS();
 }
+#endif
