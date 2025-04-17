@@ -50,6 +50,65 @@ public:
 		}
 		return ret;
 	}
+
+	string fullWriteAndReadCompare() {
+
+		for (int groupStart = SSD_MINIMUM_ADDRESS; groupStart < SSD_MAXIMUM_ADDRESS; groupStart += 5) {
+			std::stringstream ss;
+			ss << std::hex << std::setw(2) << std::setfill('0') << groupStart;
+			string value = "0x123456" + ss.str();
+			if (groupWriteAndReadCompare(groupStart, groupStart + 5, value) == "FAIL") return "FAIL";
+		}
+
+		return "PASS";
+	}
+
+	string partialLBAWrite(string value) {
+		if (!isValidValue(value)) return "ERROR";
+
+		for (int i = 0; i < 30; i++)
+		{
+			ssd->write(4, value);
+			ssd->write(0, value);
+			ssd->write(3, value);
+			ssd->write(1, value);
+			ssd->write(2, value);
+
+			if (value != ssd->read(4)) return "ERROR";
+			if (value != ssd->read(0)) return "ERROR";
+			if (value != ssd->read(3)) return "ERROR";
+			if (value != ssd->read(1)) return "ERROR";
+			if (value != ssd->read(2)) return "ERROR";
+		}
+		return "Done";
+	}
+
+	string writeReadAging(string value) {
+		if (!isValidValue(value)) return "ERROR";
+
+		for (int i = 0; i < 200; i++)
+		{
+			ssd->write(0, value);
+			ssd->write(99, value);
+			if (ssd->read(0) != ssd->read(99))
+				return "ERROR";
+		}
+		return "Done";
+	}
+
+	string groupWriteAndReadCompare(int startAddr, int endAddr, string value) {
+
+		for (int addr = startAddr; addr < endAddr; addr++) {
+			ssd->write(addr, value);
+		}
+
+		for (int addr = startAddr; addr < endAddr; addr++) {
+			if (value != ssd->read(addr)) return "FAIL";
+		}
+
+		return "PASS";
+	}
+
 private:
 	SSD* ssd;
 	const int SSD_MINIMUM_ADDRESS = 0;
@@ -72,4 +131,6 @@ private:
 
 		return true;
 	}
+
+
 };
