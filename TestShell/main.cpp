@@ -174,7 +174,7 @@ TEST(ShellTest, partialLBAWriteTest) {
 		.Times(150)
 		.WillRepeatedly(Return(VALID_VALUE));
 
-	string expected = "Done";
+	string expected = "PASS";
 	string actual = ts.partialLBAWrite(value);
 	EXPECT_EQ(expected, actual);
 }
@@ -196,7 +196,7 @@ TEST(ShellTest, writeReadAging) {
 	EXPECT_CALL(ssd, write(99, _))
 		.Times(200);
 
-	string expected = "Done";
+	string expected = "PASS";
 	string actual = ts.writeReadAging(value);
 	EXPECT_EQ(expected, actual);
 }
