@@ -5,100 +5,113 @@
 
 using std::exception;
 
-const std::string SSD::nandFileName = "ssd_nand.txt";
-const std::string SSD::nandOutputFileName = "ssd_output.txt";
-
 SSD::SSD()
 {
-    int fileExist;
-    if ((fileExist = _access_s(nandFileName.c_str(), 0)) != 0) {
+    if (_access_s(SSD_NANE_FILE_NAME, 0) != 0) {
         // nand file is not exist
         FILE* fp = nullptr;
-        int returnResult = 0;
 
-        if ((returnResult = fopen_s(&fp, nandFileName.c_str(), "wb+")) != 0) {
-            fopen_s(&fp, nandFileName.c_str(), "wb+"); // try to open again when fail
+        if ((fopen_s(&fp, SSD_NANE_FILE_NAME, "wb+")) != 0) {
+			return;
         }
 
         uint32_t value = 0;
-        // need to optimize
-        for (int i = 0; i <= MAX_LBA; ++i) {
-            fwrite(&value, sizeof(uint32_t), 1, fp);
-        }
+        uint32_t nandBuff[MAX_LBA + 1];
+
+		memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
+		fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
 
         fflush(fp);
         fclose(fp);
     }
 }
 
-uint32_t SSD::Read(uint32_t nLba)
+bool SSD::Read(uint32_t nLba)
 {
-    if (nLba < MIN_LBA || nLba > MAX_LBA)
-    {
-        return 0;
-    }
-
-    int result = 0;
     uint32_t readValue = 0;
-    char buf[32];
-    FILE* fp = nullptr;
 
     // read operation
-    if ((result = fopen_s(&fp, nandFileName.c_str(), "rb")) != 0) {
-        fopen_s(&fp, nandFileName.c_str(), "rb"); // try to open again when fail
-    }
+	if (ReadLbaFromSsd(nLba, readValue) == false) {
+		return false;
+	}
 
-    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
-    fread(&readValue, sizeof(uint32_t), 1, fp);
+	if (WriteToOutputFile(readValue) == false) {
+		return false;
+	}
 
-    fclose(fp);
-
-    // write result
-    if ((result = fopen_s(&fp, nandOutputFileName.c_str(), "w+")) != 0) {
-        fopen_s(&fp, nandOutputFileName.c_str(), "w+");
-    }
-
-    fprintf(fp, "0x%08x", readValue);
-
-    fflush(fp);
-    fclose(fp);
-
-    return readValue;
+    return true;
 }
 
-uint32_t SSD::Write(unsigned int nLba, uint32_t value)
+bool SSD::Write(unsigned int nLba, uint32_t value)
 {
-    if (nLba < MIN_LBA || nLba > MAX_LBA)
-    {
-        return 0;
-    }
-
-    int result = 0;
     FILE* fp = nullptr;
 
-    if ((result = fopen_s(&fp, nandFileName.c_str(), "wb")) != 0) {
-        fopen_s(&fp, nandFileName.c_str(), "wb");
+    if (fopen_s(&fp, SSD_NANE_FILE_NAME, "wb") != 0) {
+        return false;
     }
 
     fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
 
-    fwrite(&value, sizeof(uint32_t), 1, fp);
+	fwrite(&value, sizeof(uint32_t), 1, fp);
 
     fflush(fp);
     fclose(fp);
 
-    return value;
+    return true;
 }
 
-std::string SSD::getSsdNandFileName()
+bool SSD::ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue)
 {
-    return nandFileName;
+	FILE* fp = nullptr;
+
+	if (fopen_s(&fp, SSD_NANE_FILE_NAME, "rb") != 0) {
+		return false;
+	}
+
+	fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
+	fread(&readValue, sizeof(uint32_t), 1, fp);
+
+	fclose(fp);
+
+	return true;
 }
 
-std::string SSD::getSsdOutputFileName()
+bool SSD::WriteToOutputFile(uint32_t readValue)
 {
-    return nandOutputFileName;
+	FILE* fp = nullptr;
+	// write result
+	if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+		return false;
+	}
+
+	if (fprintf(fp, "0x%08x", readValue) != VALUE_INPUT_LENGTH) {
+		return false;
+	}
+
+	fflush(fp);
+	fclose(fp);
+
+	return true;
 }
+
+bool SSD::WriteToOutputFileError()
+{
+	FILE* fp = nullptr;
+
+	if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+		return false;
+	}
+
+	if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
+		return false;
+	}
+
+	fflush(fp);
+	fclose(fp);
+
+	return true;
+}
+
 
 bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue)
 {
@@ -110,10 +123,16 @@ bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLb
 	// Read
 	if (argc == 3)
 	{
+		WriteToOutputFileError();
 		return bValid;
 	}
 
 	bValid = bValid && CheckValue(argc, argv, pnValue);
+	
+	if (bValid == false)
+	{
+		WriteToOutputFileError();
+	}
 	return bValid;
 }
 
