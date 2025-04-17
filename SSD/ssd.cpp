@@ -52,7 +52,7 @@ bool SSD::Write(unsigned int nLba, uint32_t value)
 {
     FILE* fp = nullptr;
 
-    if (fopen_s(&fp, SSD_NAND_FILE_NAME, "wb") != 0) {
+    if (fopen_s(&fp, SSD_NAND_FILE_NAME, "r+b") != 0) {
         return false;
     }
 
