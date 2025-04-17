@@ -207,7 +207,6 @@ TEST(ShellTest, invalidWriteArgumentCount) {
 
 	bool actual = ts.isValidCommandAndArgument(command);
 	EXPECT_FALSE(actual);
-
 }
 
 TEST(ShellTest, invalidWriteLba) {
