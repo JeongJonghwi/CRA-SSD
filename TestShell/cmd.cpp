@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-
+#include <iostream>
 using std::string;
 using std::vector;
 
@@ -10,8 +10,9 @@ public:
 	CMD() {};
 
 	bool validCheck(string command) {
+
 		vector<string> rawdata = splitBySpace(command);
-		
+
 		if (rawdata.size() <= 0 || rawdata.size() > 3)
 			return false;
 
@@ -33,13 +34,15 @@ public:
 		}
 
 		if (rawdata.size() == 2) {
-			if (input != "read" || input != "fullwrite")
+
+			if (input != string("read") && input != "fullwrite")
 				return false;
 
 			if (input == "read") {
 				if (!isNumber(rawdata[1])) return false;
 				if (!isValidAddress(stoi(rawdata[1])))
 					return false;
+
 				address = stoi(rawdata[1]);
 
 				return true;

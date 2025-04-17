@@ -33,6 +33,8 @@ public:
 			firstLine = buffer;
 		}
 
+		fclose(file);
+
 		return firstLine;
 	}
 
