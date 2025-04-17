@@ -14,22 +14,25 @@
 using std::string;
 using std::strtol;
 
+#define SSD_NANE_FILE_NAME "ssd_nand.txt"
+#define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
+#define SSD_ERROR_STRING "ERROR"
+
 class SSD
 {
 public:
     SSD();
-    uint32_t Read(uint32_t nLba);
-    uint32_t Write(uint32_t nLba, uint32_t value);
-    static string getSsdNandFileName();
-    static string getSsdOutputFileName();
-    static bool isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue);
+    bool Read(uint32_t nLba);
+    bool Write(uint32_t nLba, uint32_t value);
+    bool ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue);
+    bool WriteToOutputFile(uint32_t readValue);
+    bool WriteToOutputFileError();
+    bool isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue);
 private:
-    static bool CheckCMDandNumofParam(int argc, char* argv[]);
-    static bool CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba);
-    static bool CheckValue(int argc, char* argv[], OUT unsigned int* pnValue);
+    bool CheckCMDandNumofParam(int argc, char* argv[]);
+    bool CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba);
+    bool CheckValue(int argc, char* argv[], OUT unsigned int* pnValue);
 
-    static const std::string nandFileName;
-    static const std::string nandOutputFileName;
 };
 
 #endif
