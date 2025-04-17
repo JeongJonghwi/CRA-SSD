@@ -1,7 +1,8 @@
 #include "real_ssd.h"
 #include "test_shell.cpp"
+#include <random>
 
-#if _DEBUG
+#ifdef _DEBUG
 #include "gmock/gmock.h"
 
 int main(void)
@@ -9,8 +10,16 @@ int main(void)
     ::testing::InitGoogleMock();
     return RUN_ALL_TESTS();
 }
-
 #else
+string randomValue()
+{
+    unsigned int random_value = static_cast<unsigned int>(std::rand());
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << random_value;
+    std::string hexStr = "0x" + ss.str();
+    return hexStr;
+}
+
 int main(void)
 {
     RealSSD ssd;
@@ -40,9 +49,9 @@ int main(void)
             } else if (command == "1_" || command == "1_FullWriteAndReadCompare") {
                 std::cout << test_shell.fullWriteAndReadCompare() << std::endl;
             } else if (command == "2_" || command == "2_PartialLBAWrite") {
-                std::cout << test_shell.partialLBAWrite(cmd.getValue()) << std::endl;
+                std::cout << test_shell.partialLBAWrite("0xFFFFFFFF") << std::endl;
             } else if (command == "3_" || command == "3_WriteReadAging") {
-                std::cout << test_shell.writeReadAging(cmd.getValue()) << std::endl;
+                std::cout << test_shell.writeReadAging(randomValue()) << std::endl;
             }
         } else
             std::cout << "INVALID COMMAND" << std::endl;
