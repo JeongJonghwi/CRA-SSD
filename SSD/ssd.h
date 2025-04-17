@@ -1,9 +1,6 @@
 #ifndef __SSD_H__
 #define __SSD_H__
 
-#define MIN_LBA (0)
-#define MAX_LBA (99)
-#define VALUE_INPUT_LENGTH (10)
 #define OUT
 
 #include <string>
@@ -18,6 +15,12 @@ using std::strtol;
 #define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
 #define SSD_ERROR_STRING "ERROR"
 
+enum CmdType
+{
+    READ,
+    WRITE,
+};
+
 class SSD
 {
 public:
@@ -27,9 +30,9 @@ public:
     bool ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue);
     bool WriteToOutputFile(uint32_t readValue);
     bool WriteToOutputFileError();
-    bool isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue);
+    bool isValidCheckAndCastType(int argc, char* argv[], OUT CmdType* peCmd, OUT unsigned int* pnLba, OUT unsigned int* pnValue);
 private:
-    bool CheckCMDandNumofParam(int argc, char* argv[]);
+    bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* peCmd);
     bool CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba);
     bool CheckValue(int argc, char* argv[], OUT unsigned int* pnValue);
 
