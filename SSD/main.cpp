@@ -1,6 +1,6 @@
 #include "ssd.h"
 
-#if _DEBUG
+#ifdef _DEBUG
 #include "gmock/gmock.h"
 
 int main(void)
@@ -13,19 +13,19 @@ int main(int argc, char* argv[])
 {
     SSD ssd;
     CmdType cmd;
-    unsigned int nLba, nValue;
+    uint32_t lba, value;
 
-    if (ssd.isValidCheckAndCastType(argc, argv, &cmd, &nLba, &nValue) == false) {
+    if (ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
         ssd.WriteToOutputFileError();
         return 0;
     }
 
     switch (cmd) {
     case READ:
-        ssd.Read(nLba);
+        ssd.Read(lba);
         break;
     case WRITE:
-        ssd.Write(nLba, nValue);
+        ssd.Write(lba, value);
         break;
     }
 

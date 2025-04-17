@@ -24,15 +24,15 @@ public:
     SSD(const SSD& ssd) = delete;
     SSD& operator=(const SSD& ssd) = delete;
 
-    bool Read(uint32_t nLba);
-    bool Write(uint32_t nLba, uint32_t value);
-    bool ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue);
+    bool Read(uint32_t lba);
+    bool Write(uint32_t lba, uint32_t value);
+    bool ReadLbaFromSsd(uint32_t lba, uint32_t& readValue);
     bool WriteToOutputFile(uint32_t readValue);
     bool WriteToOutputFileError();
-    bool isValidCheckAndCastType(int argc, char* argv[], OUT CmdType* peCmd, OUT unsigned int* pnLba, OUT unsigned int* pnValue);
+    bool IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value);
 
 private:
-    bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* peCmd);
-    bool CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba);
-    bool CheckValue(int argc, char* argv[], OUT unsigned int* pnValue);
+    bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd);
+    bool CheckLBA(int argc, char* argv[], OUT uint32_t* lba);
+    bool CheckValue(int argc, char* argv[], OUT uint32_t* value);
 };
