@@ -89,7 +89,7 @@ bool SSD::WriteToOutputFile(uint32_t readValue)
         return false;
     }
 
-    if (fprintf(fp, "0x%08x", readValue) != VALUE_INPUT_LENGTH) {
+    if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
         return false;
     }
 
@@ -135,7 +135,8 @@ bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT CmdType* peCmd, OU
 
 bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* peCmd)
 {
-    if (argc <= 1) return false;
+    if (argc <= 1)
+        return false;
 
     if (strcmp(argv[PARAM_CMD], "R") == 0) {
         if (argc != READ_ARG_NUM) {

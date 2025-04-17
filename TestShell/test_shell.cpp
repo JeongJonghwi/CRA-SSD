@@ -1,6 +1,7 @@
 #include "cmd.cpp"
 #include "interface.h"
 #include "gmock/gmock.h"
+#include <string>
 #include <vector>
 
 class TestShell {
@@ -139,6 +140,7 @@ private:
 
     bool didReadFail(string actual, string expected)
     {
+        std::transform(expected.begin() + 2, expected.end(), expected.begin() + 2, ::toupper);
         if (actual != expected)
             return true;
         return false;
