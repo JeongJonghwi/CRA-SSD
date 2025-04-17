@@ -1,10 +1,8 @@
 #include "ssd.h"
-#include <stdexcept>
-#include <io.h>
 #include <fcntl.h>
+#include <io.h>
+#include <stdexcept>
 
-#define MIN_LBA (0)
-#define MAX_LBA (99)
 #define VALUE_INPUT_LENGTH (10)
 
 #define READ_ARG_NUM (3)
@@ -18,23 +16,35 @@ using std::exception;
 
 SSD::SSD()
 {
+    FILE* fp = nullptr;
+
     if (_access_s(SSD_NANE_FILE_NAME, 0) != 0) {
         // nand file is not exist
-        FILE* fp = nullptr;
 
         if ((fopen_s(&fp, SSD_NANE_FILE_NAME, "wb+")) != 0) {
-			exit(0);
+            exit(0);
         }
 
         uint32_t value = 0;
-        uint32_t nandBuff[MAX_LBA + 1];
+        // uint32_t nandBuff[MAX_LBA + 1];
 
-		memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
-		fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
+        memset(ssdBuffer, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
+        fwrite(ssdBuffer, sizeof(uint32_t), (MAX_LBA + 1), fp);
 
         fflush(fp);
         fclose(fp);
+
+        return;
     }
+
+    if ((fopen_s(&fp, SSD_NANE_FILE_NAME, "rb")) != 0) {
+        exit(0);
+    }
+
+    fread(ssdBuffer, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
+
+    fflush(fp);
+    fclose(fp);
 }
 
 bool SSD::Read(uint32_t nLba)
@@ -42,13 +52,14 @@ bool SSD::Read(uint32_t nLba)
     uint32_t readValue = 0;
 
     // read operation
-	if (ReadLbaFromSsd(nLba, readValue) == false) {
-		return false;
-	}
+    // if (ReadLbaFromSsd(nLba, readValue) == false) {
+    //	return false;
+    //}
+    readValue = ssdBuffer[nLba];
 
-	if (WriteToOutputFile(readValue) == false) {
-		return false;
-	}
+    if (WriteToOutputFile(readValue) == false) {
+        return false;
+    }
 
     return true;
 }
@@ -61,11 +72,11 @@ bool SSD::Write(unsigned int nLba, uint32_t value)
         return false;
     }
 
-    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
+    ssdBuffer[nLba] = value;
+    fwrite(ssdBuffer, sizeof(uint32_t), (MAX_LBA + 1), fp);
+    // fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
+    // fwrite(&value, sizeof(uint32_t), 1, fp);
 
-	fwrite(&value, sizeof(uint32_t), 1, fp);
-
-    fflush(fp);
     fclose(fp);
 
     return true;
@@ -73,139 +84,125 @@ bool SSD::Write(unsigned int nLba, uint32_t value)
 
 bool SSD::ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue)
 {
-	FILE* fp = nullptr;
+    FILE* fp = nullptr;
 
-	if (fopen_s(&fp, SSD_NANE_FILE_NAME, "rb") != 0) {
-		return false;
-	}
+    if (fopen_s(&fp, SSD_NANE_FILE_NAME, "rb") != 0) {
+        return false;
+    }
 
-	fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
-	fread(&readValue, sizeof(uint32_t), 1, fp);
+    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
+    fread(&readValue, sizeof(uint32_t), 1, fp);
 
-	fclose(fp);
+    fclose(fp);
 
-	return true;
+    return true;
 }
 
 bool SSD::WriteToOutputFile(uint32_t readValue)
 {
-	FILE* fp = nullptr;
-	// write result
-	if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
-		return false;
-	}
+    FILE* fp = nullptr;
+    // write result
+    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+        return false;
+    }
 
-	if (fprintf(fp, "0x%08x", readValue) != VALUE_INPUT_LENGTH) {
-		return false;
-	}
+    if (fprintf(fp, "0x%08x", readValue) != VALUE_INPUT_LENGTH) {
+        return false;
+    }
 
-	fflush(fp);
-	fclose(fp);
+    fflush(fp);
+    fclose(fp);
 
-	return true;
+    return true;
 }
 
 bool SSD::WriteToOutputFileError()
 {
-	FILE* fp = nullptr;
+    FILE* fp = nullptr;
 
-	if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
-		return false;
-	}
+    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+        return false;
+    }
 
-	if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
-		return false;
-	}
+    if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
+        return false;
+    }
 
-	fflush(fp);
-	fclose(fp);
+    fflush(fp);
+    fclose(fp);
 
-	return true;
+    return true;
 }
 
 bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT CmdType* peCmd, OUT unsigned int* pnLba, OUT unsigned int* pnValue)
 {
-	bool bValid = true;
+    bool bValid = true;
 
-	bValid = bValid && CheckCMDandNumofParam(argc, argv, peCmd);
-	bValid = bValid && CheckLBA(argc, argv, pnLba);
+    bValid = bValid && CheckCMDandNumofParam(argc, argv, peCmd);
+    bValid = bValid && CheckLBA(argc, argv, pnLba);
 
-	if (argc == READ_ARG_NUM)
-	{
-		return bValid;
-	}
+    if (argc == READ_ARG_NUM) {
+        return bValid;
+    }
 
-	bValid = bValid && CheckValue(argc, argv, pnValue);
-	
-	return bValid;
+    bValid = bValid && CheckValue(argc, argv, pnValue);
+
+    return bValid;
 }
 
 bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* peCmd)
 {
-	if (argc <= 1)  // no parameter
-	{
-		return false;
-	}
-	if (strcmp(argv[PARAM_CMD], "R") == 0)
-	{
-		if (argc != READ_ARG_NUM)
-		{
-			return false;
-		}
+    if (argc <= 1) // no parameter
+    {
+        return false;
+    }
+    if (strcmp(argv[PARAM_CMD], "R") == 0) {
+        if (argc != READ_ARG_NUM) {
+            return false;
+        }
         *peCmd = READ;
-	}
-	else if (strcmp(argv[PARAM_CMD], "W") == 0)
-	{
-		if (argc != WRITE_ARG_NUM)
-		{
-			return false;
-		}
+    } else if (strcmp(argv[PARAM_CMD], "W") == 0) {
+        if (argc != WRITE_ARG_NUM) {
+            return false;
+        }
         *peCmd = WRITE;
-	}
-	else
-	{
-		return false;
-	}
-	
-	return true;
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 bool SSD::CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba)
 {
-	for (int i=0; i<strlen(argv[PARAM_LBA]); i++)
-	{
-		if (argv[PARAM_LBA][i] < '0' || argv[PARAM_LBA][i] > '9')
-		{
-			return false;
-		}
-	}
+    for (int i = 0; i < strlen(argv[PARAM_LBA]); i++) {
+        if (argv[PARAM_LBA][i] < '0' || argv[PARAM_LBA][i] > '9') {
+            return false;
+        }
+    }
 
-	*pnLba = atoi(argv[PARAM_LBA]);
-	if (*pnLba < MIN_LBA || *pnLba > MAX_LBA)
-	{
-		return false;
-	}
+    *pnLba = atoi(argv[PARAM_LBA]);
+    if (*pnLba < MIN_LBA || *pnLba > MAX_LBA) {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool SSD::CheckValue(int argc, char* argv[], OUT unsigned int* pnValue)
 {
-	if (strlen(argv[PARAM_VALUE]) != VALUE_INPUT_LENGTH)
-	{
-		return false;
-	}
-	if (argv[PARAM_VALUE][0] != '0' || argv[PARAM_VALUE][1] != 'x')
-	{
-		return false;
-	}
+    if (strlen(argv[PARAM_VALUE]) != VALUE_INPUT_LENGTH) {
+        return false;
+    }
+    if (argv[PARAM_VALUE][0] != '0' || argv[PARAM_VALUE][1] != 'x') {
+        return false;
+    }
 
-	char *end;
-	*pnValue = (unsigned int)strtol(argv[PARAM_VALUE], &end, 16);
-	if (end != &argv[PARAM_VALUE][VALUE_INPUT_LENGTH])
-	{
-		return false;
-	}
+    char* end;
+    *pnValue = (unsigned int)strtol(argv[PARAM_VALUE], &end, 16);
+    if (end != &argv[PARAM_VALUE][VALUE_INPUT_LENGTH]) {
+        return false;
+    }
 
-	return true;
+    return true;
 }
