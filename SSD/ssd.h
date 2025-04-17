@@ -1,5 +1,4 @@
-#ifndef __SSD_H__
-#define __SSD_H__
+#pragma once
 
 #include <cstdlib>
 #include <cstring>
@@ -9,7 +8,6 @@
 #define OUT
 
 using std::string;
-using std::strtol;
 
 #define SSD_NAND_FILE_NAME "ssd_nand.txt"
 #define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
@@ -22,7 +20,10 @@ enum CmdType {
 
 class SSD {
 public:
-    SSD();
+    explicit SSD();
+    SSD(const SSD& ssd) = delete;
+    SSD& operator=(const SSD& ssd) = delete;
+
     bool Read(uint32_t nLba);
     bool Write(uint32_t nLba, uint32_t value);
     bool ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue);
@@ -35,4 +36,3 @@ private:
     bool CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba);
     bool CheckValue(int argc, char* argv[], OUT unsigned int* pnValue);
 };
-#endif

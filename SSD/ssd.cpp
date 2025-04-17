@@ -48,7 +48,7 @@ bool SSD::Read(uint32_t nLba)
     return true;
 }
 
-bool SSD::Write(unsigned int nLba, uint32_t value)
+bool SSD::Write(uint32_t nLba, uint32_t value)
 {
     FILE* fp = nullptr;
 
@@ -56,10 +56,13 @@ bool SSD::Write(unsigned int nLba, uint32_t value)
         return false;
     }
 
-    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
-    fwrite(&value, sizeof(uint32_t), 1, fp);
+    if (fseek(fp, nLba * sizeof(uint32_t), SEEK_SET) != 0) {
+        return false;
+    }
 
+    fwrite(&value, sizeof(uint32_t), 1, fp);
     fflush(fp);
+
     fclose(fp);
 
     return true;
@@ -73,9 +76,11 @@ bool SSD::ReadLbaFromSsd(uint32_t nLba, uint32_t& readValue)
         return false;
     }
 
-    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
-    fread(&readValue, sizeof(uint32_t), 1, fp);
+    if (fseek(fp, nLba * sizeof(uint32_t), SEEK_SET) != 0) {
+        return false;
+    }
 
+    fread(&readValue, sizeof(uint32_t), 1, fp);
     fclose(fp);
 
     return true;
