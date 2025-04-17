@@ -2,9 +2,12 @@
 #include "ssd.h"
 #include <string>
 #include <stdexcept>
+
 #include<sys/types.h>
 #include<sys/stat.h>
 #include <cstdio>
+#include <iostream>
+#include <filesystem>
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -28,6 +31,13 @@ public:
 		fscanf_s(fp, "%s", buf);
 
 		fclose(fp);
+
+		return stoi(string(&buf[2]), 0, 10);
+	}
+protected:
+	void TearDown() override {
+		remove(ssd.getSsdNandFileName().c_str());
+		remove(ssd.getSsdOutputFileName().c_str());
 	}
 };
 
@@ -77,7 +87,6 @@ TEST_F(SSDTestFixture, writeFailWithInvalidValue) {
 */
 
 TEST_F(SSDTestFixture, writeWithFile) {
-	SSD ssd;
 	uint32_t lba = 1;
 	uint32_t value = 0x12345678;
 	uint32_t expected = 0x00000000;
@@ -90,8 +99,7 @@ TEST_F(SSDTestFixture, writeWithFile) {
 }
 
 TEST_F(SSDTestFixture, readWithFile) {
-	SSD ssd;
-	uint32_t lba = 2;
+	uint32_t lba = 1;
 	uint32_t expected = 0x00000000;
 
 	uint32_t actual = ssd.Read(lba);

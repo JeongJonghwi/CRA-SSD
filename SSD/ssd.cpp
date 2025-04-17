@@ -40,6 +40,7 @@ uint32_t SSD::Read(uint32_t nLba)
 
     int result = 0;
     uint32_t readValue = 0;
+    char buf[32];
     FILE* fp = nullptr;
 
     // read operation
@@ -47,9 +48,9 @@ uint32_t SSD::Read(uint32_t nLba)
         fopen_s(&fp, nandFileName.c_str(), "rb"); // try to open again when fail
     }
 
-    fseek(fp, nLba, SEEK_SET);
-
+    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
     fread(&readValue, sizeof(uint32_t), 1, fp);
+
     fclose(fp);
 
     // write result
@@ -57,7 +58,7 @@ uint32_t SSD::Read(uint32_t nLba)
         fopen_s(&fp, nandOutputFileName.c_str(), "w+");
     }
 
-    fprintf(fp, "0x%x", readValue);
+    fprintf(fp, "0x%08x", readValue);
 
     fflush(fp);
     fclose(fp);
@@ -79,7 +80,7 @@ uint32_t SSD::Write(unsigned int nLba, uint32_t value)
         fopen_s(&fp, nandFileName.c_str(), "wb");
     }
 
-    fseek(fp, nLba, SEEK_SET);
+    fseek(fp, nLba * sizeof(uint32_t), SEEK_SET);
 
     fwrite(&value, sizeof(uint32_t), 1, fp);
 
