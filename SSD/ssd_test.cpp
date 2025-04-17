@@ -212,3 +212,20 @@ TEST_F(SSDTestFixture, invalidValueTest)
     bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
+
+TEST_F(SSDTestFixture, MixCapitalSmallTest)
+{
+    int argc = 4;
+    char* argv[5];
+    uint32_t lba;
+    uint32_t value;
+    CmdType eCmd;
+
+    argv[1] = const_cast<char*>("W");
+    argv[2] = const_cast<char*>("1");
+    argv[3] = const_cast<char*>("0xAaAaAaAa");
+
+    unsigned int expected = 0xaaaaaaaa;
+    ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
+    EXPECT_EQ(expected, value);
+}
