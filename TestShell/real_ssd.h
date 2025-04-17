@@ -1,58 +1,57 @@
 #pragma once
-#include <windows.h>
 #include "interface.h"
+#include <windows.h>
 
 class RealSSD : public SSD {
-
 public:
-	RealSSD() {
-		exeDir = getExecutablePath();
-	}
+    RealSSD()
+    {
+        exeDir = getExecutablePath();
+    }
 
-	string read(uint32_t address) {
-		std::string command = exeDir + "/SSD.exe R " + std::to_string(address);
+    string read(uint32_t address)
+    {
+        std::string command = exeDir + "/SSD.exe R " + std::to_string(address);
 
-		FILE* pipe = _popen(command.c_str(), "r");
-		if (!pipe) {
-			return "ERROR";
-		}
+        FILE* pipe = _popen(command.c_str(), "r");
+        if (!pipe)
+            return "ERROR";
 
-		_pclose(pipe);
-		
-		FILE* file = nullptr;
-		errno_t err = fopen_s(&file, "ssd_output.txt", "r");
+        _pclose(pipe);
 
-		if (err != 0 || file == nullptr) {
-			return "0x00000000";
-		}
+        FILE* file = nullptr;
+        errno_t err = fopen_s(&file, "ssd_output.txt", "r");
 
-		char buffer[256];  // Max line length
-		std::string firstLine = "";
+        if (err != 0 || file == nullptr)
+            return "0x00000000";
 
-		if (fgets(buffer, sizeof(buffer), file)) {
-			firstLine = buffer;
-		}
+        char buffer[256];
+        std::string firstLine = "";
 
-		fclose(file);
+        if (fgets(buffer, sizeof(buffer), file))
+            firstLine = buffer;
 
-		return firstLine;
-	}
+        fclose(file);
 
-	void write(uint32_t address, string value) {
-		std::string command = exeDir + "/SSD.exe W " + std::to_string(address) + " " + value;
-		FILE* pipe = _popen(command.c_str(), "r");
-		if (pipe) {
-			_pclose(pipe);
-		}
-	}
+        return firstLine;
+    }
+
+    void write(uint32_t address, string value)
+    {
+        std::string command = exeDir + "/SSD.exe W " + std::to_string(address) + " " + value;
+        FILE* pipe = _popen(command.c_str(), "r");
+        if (pipe)
+            _pclose(pipe);
+    }
 
 private:
-	std::string exeDir;
+    std::string exeDir;
 
-	std::string getExecutablePath() {
-		char path[MAX_PATH];
-		GetModuleFileNameA(NULL, path, MAX_PATH);
-		std::string exePath(path);
-		return exePath.substr(0, exePath.find_last_of("\\/"));
-	}
+    std::string getExecutablePath()
+    {
+        char path[MAX_PATH];
+        GetModuleFileNameA(NULL, path, MAX_PATH);
+        std::string exePath(path);
+        return exePath.substr(0, exePath.find_last_of("\\/"));
+    }
 };
