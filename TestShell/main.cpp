@@ -372,6 +372,34 @@ TEST(ShellTest, TestCase3_FullDoNotWorkTest) {
 	EXPECT_FALSE(actual);
 }
 
+TEST(ShellTest, readWithRealSSD) {
+	string command = "read";
+	TestShell ts;
+	uint32_t lba = VALID_ADDRESS;
+
+	ts.read(VALID_ADDRESS);
+
+	string expected = "0x00000000";
+	string actual;
+
+	FILE* fp;
+	fp = fopen("ssd_output.txt", "r");
+	read(fp, &actual, 10);
+	EXPECT_EQ(expected, actual);
+}
+
+TEST(ShellTest, writeWithRealSSD) {
+	string command = "write";
+	TestShell ts;
+	uint32_t lba = VALID_ADDRESS;
+	string value = VALID_VALUE;
+
+	string expected = "[Write] Done";
+	string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
+
+	EXPECT_EQ(expected, actual);
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
