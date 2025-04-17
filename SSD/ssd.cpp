@@ -99,3 +99,88 @@ std::string SSD::getSsdOutputFileName()
 {
     return nandOutputFileName;
 }
+
+bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue)
+{
+	bool bValid = true;
+
+	bValid = bValid && CheckCMDandNumofParam(argc, argv);
+	bValid = bValid && CheckLBA(argc, argv, pnLba);
+
+	// Read
+	if (argc == 3)
+	{
+		return bValid;
+	}
+
+	bValid = bValid && CheckValue(argc, argv, pnValue);
+	return bValid;
+}
+
+bool SSD::CheckCMDandNumofParam(int argc, char* argv[])
+{
+	if (argc < 2)
+	{
+		return false;
+	}
+	if (strcmp(argv[1], "R") == 0)
+	{
+		if (argc != 3)
+		{
+			return false;
+		}
+	}
+	else if (strcmp(argv[1], "W") == 0)
+	{
+		if (argc != 4)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+bool SSD::CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba)
+{
+	for (int i=0; i<strlen(argv[2]); i++)
+	{
+		if (argv[2][i] < '0' || argv[2][i] > '9')
+		{
+			return false;
+		}
+	}
+
+	*pnLba = atoi(argv[2]);
+	if (*pnLba < MIN_LBA || *pnLba > MAX_LBA)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool SSD::CheckValue(int argc, char* argv[], OUT unsigned int* pnValue)
+{
+	if (strlen(argv[3]) != VALUE_INPUT_LENGTH)
+	{
+		return false;
+	}
+	if (argv[3][0] != '0' || argv[3][1] != 'x')
+	{
+		return false;
+	}
+
+	char *end;
+	*pnValue = (unsigned int)strtol(argv[3], &end, 16);
+	if (end != &argv[3][VALUE_INPUT_LENGTH])
+	{
+		return false;
+	}
+
+	return true;
+}

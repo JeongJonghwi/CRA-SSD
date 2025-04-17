@@ -11,17 +11,8 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <cstring>
-#include <cstdlib>
-
 using std::exception;
 using std::string;
-using std::strtol;
-
-#define OUT
-#define VALUE_INPUT_LENGTH (10)
-
-bool isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue);
 
 class SSDTestFixture : public ::testing::Test {
 public:
@@ -126,7 +117,7 @@ TEST(SSDTest, checkArgumentRead) {
 	argv[2] = const_cast<char*>("1");
 
 	bool expected = true;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 	EXPECT_EQ(1, lba);
 }
@@ -142,7 +133,7 @@ TEST(SSDTest, checkArgumentWrite) {
 	argv[3] = const_cast<char*>("0x12345678");
 
 	bool expected = true;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 	EXPECT_EQ(1, lba);
 	EXPECT_EQ(0x12345678, value);
@@ -155,7 +146,7 @@ TEST(SSDTest, invalidArgumentsCountTest1) {
 	uint32_t value;
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -168,7 +159,7 @@ TEST(SSDTest, invalidArgumentsCountTest2) {
 	argv[1] = const_cast<char*>("W"); // write need totally 4 arguments
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -181,7 +172,7 @@ TEST(SSDTest, invalidArgumentsCountTest3) {
 	argv[1] = const_cast<char*>("R"); // read need totally 3 arguments
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -194,7 +185,7 @@ TEST(SSDTest, invalidOperationTest) {
 	argv[1] = const_cast<char*>("C"); // not R or W
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -208,7 +199,7 @@ TEST(SSDTest, invalidAddressRangeTest) {
 	argv[2] = const_cast<char*>("100"); // LBA Range must in 0-99
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -223,77 +214,8 @@ TEST(SSDTest, invalidValueTest) {
 	argv[3] = const_cast<char*>("0xTTTTFFFF"); // not hexadeciamal
 
 	bool expected = false;
-	bool actual = isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = SSD::isValidCheckAndCastType(argc, argv, &lba, &value);
 	EXPECT_EQ(expected, actual);
-}
-
-bool isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue)
-{
-	int nLba, nValue;
-	// CMD - parameter check
-	if (argc < 2)
-	{
-		return false;
-	}
-	if (strcmp(argv[1], "R") == 0)
-	{
-		if (argc != 3)
-		{
-			return false;
-		}
-	}
-	else if (strcmp(argv[1], "W") == 0)
-	{
-		if (argc != 4)
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
-
-	// Valid Check - LBA
-	for (int i=0; i<strlen(argv[2]); i++)
-	{
-		if (argv[2][i] < '0' || argv[2][i] > '9')
-		{
-			return false;
-		}
-	}
-
-	nLba = atoi(argv[2]);
-    if (nLba < MIN_LBA || nLba > MAX_LBA)
-	{
-		return false;
-	}
-
-	// Read
-	*pnLba = nLba;
-	if (argc == 3)
-	{
-		return true;
-	}
-
-	// Valid Check - Value
-	if (strlen(argv[3]) != VALUE_INPUT_LENGTH)
-	{
-		return false;
-	}
-	if (argv[3][0] != '0' || argv[3][1] != 'x')
-	{
-		return false;
-	}
-	char *end;
-    nValue = (unsigned int)strtol(argv[3], &end, 16);
-	if (end != &argv[3][VALUE_INPUT_LENGTH])
-	{
-		return false;
-	}
-
-	*pnValue = nValue;
-	return true;
 }
 
 int main(void) {
