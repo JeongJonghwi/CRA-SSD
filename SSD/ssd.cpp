@@ -180,7 +180,7 @@ bool SSD::CheckValue(int argc, char* argv[], OUT unsigned int* pnValue)
     }
 
     char* end;
-    *pnValue = (unsigned int)strtol(argv[PARAM_VALUE], &end, 16);
+    *pnValue = (unsigned int)strtoul(argv[PARAM_VALUE], &end, 16);
     if (end != &argv[PARAM_VALUE][VALUE_INPUT_LENGTH]) {
         return false;
     }
