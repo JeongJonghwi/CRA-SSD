@@ -130,27 +130,49 @@ TEST(ShellTest, fullReadTest) {
 	ts.fullRead();
 }
 
-TEST(ShellTest, fullWriteAndReadCompare) {
-	EXPECT_CALL(ssd, read(_))
-		.Times(100);
+TEST(ShellTest, groupWriteAndReadCompare) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
 
-	uint32_t address = VALID_ADDRESS;
-	string value = VALID_VALUE;
-
-	string expected = "Done";
-	string actual = ts.fullWriteAndReadCompare(address, value);
+	EXPECT_CALL(ssd, write(_,_)).Times(5);
+	EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return(VALID_VALUE));
+	
+	string expected = "PASS";
+	string actual = ts.groupWriteAndReadCompare(5, 10, VALID_VALUE);
 	EXPECT_EQ(expected, actual);
 }
+
+/*
+TEST(ShellTest, fullWriteAndReadCompare) {
+	MockSSD ssd;
+	TestShell ts{ &ssd };
+
+	EXPECT_CALL(ssd, write(_, _)).Times(5);
+	EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return("0x00000010"));
+
+	EXPECT_CALL(ssd, write(_, _)).Times(5);
+	EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return("0x00000011"));
+
+	string expected = "PASS";
+	string actual = ts.groupWriteAndReadCompare(5, 10, "0x00000010");
+	EXPECT_EQ(expected, actual);
+
+	actual = ts.groupWriteAndReadCompare(10, 15, "0x00000011");
+	EXPECT_EQ(expected, actual);
+}
+*/
 
 TEST(ShellTest, partialLBAWriteTest) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
+	string value = VALID_VALUE;
 
 	EXPECT_CALL(ssd, write(_, _))
 		.Times(150);
 
 	EXPECT_CALL(ssd, read(_))
-		.Times(150);
+		.Times(150)
+		.WillRepeatedly(Return(VALID_VALUE));
 
 	string expected = "Done";
 	string actual = ts.partialLBAWrite(value);
@@ -160,12 +182,19 @@ TEST(ShellTest, partialLBAWriteTest) {
 TEST(ShellTest, writeReadAging) {
 	MockSSD ssd;
 	TestShell ts{ &ssd };
+	string value = VALID_VALUE;
+	
+	EXPECT_CALL(ssd, read(0))
+		.Times(200)
+		.WillRepeatedly(Return(VALID_VALUE));
+	EXPECT_CALL(ssd, read(99))
+		.Times(200)
+		.WillRepeatedly(Return(VALID_VALUE));
 
-	EXPECT_CALL(ssd, write(_, _))
-		.Times(40);
-
-	EXPECT_CALL(ssd, read(_))
-		.Times(40);
+	EXPECT_CALL(ssd, write(0, _))
+		.Times(200);
+	EXPECT_CALL(ssd, write(99, _))
+		.Times(200);
 
 	string expected = "Done";
 	string actual = ts.writeReadAging(value);
