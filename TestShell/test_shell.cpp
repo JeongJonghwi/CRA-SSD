@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "interface.h"
 #include "gmock/gmock.h"
 
@@ -64,36 +66,34 @@ public:
 	}
 
 	string partialLBAWrite(string value) {
-		if (!isValidValue(value)) return "ERROR";
+		if (!isValidValue(value)) return "FAIL";
 
-		for (int i = 0; i < 30; i++)
-		{
-			ssd->write(4, value);
-			ssd->write(0, value);
-			ssd->write(3, value);
-			ssd->write(1, value);
-			ssd->write(2, value);
+		std::vector<int> order = { 4,0,3,1,2 };
+		
+		for (int i = 0; i < 30; i++) {
+			for (auto o : order) {
+				ssd->write(o, value);
+			}
 
-			if (value != ssd->read(4)) return "ERROR";
-			if (value != ssd->read(0)) return "ERROR";
-			if (value != ssd->read(3)) return "ERROR";
-			if (value != ssd->read(1)) return "ERROR";
-			if (value != ssd->read(2)) return "ERROR";
+			for (auto o : order) {
+				if (didReadFail(ssd->read(o), value)) return "FAIL";
+			}
 		}
-		return "Done";
+
+		return "PASS";
 	}
 
 	string writeReadAging(string value) {
-		if (!isValidValue(value)) return "ERROR";
+		if (!isValidValue(value)) return "FAIL";
 
 		for (int i = 0; i < 200; i++)
 		{
 			ssd->write(0, value);
 			ssd->write(99, value);
-			if (ssd->read(0) != ssd->read(99))
-				return "ERROR";
+			if (didReadFail(ssd->read(0), ssd->read(99)))
+				return "FAIL";
 		}
-		return "Done";
+		return "PASS";
 	}
 
 	string groupWriteAndReadCompare(int startAddr, int endAddr, string value) {
@@ -103,7 +103,7 @@ public:
 		}
 
 		for (int addr = startAddr; addr < endAddr; addr++) {
-			if (value != ssd->read(addr)) return "FAIL";
+			if (didReadFail(ssd->read(addr), value)) return "FAIL";
 		}
 
 		return "PASS";
@@ -113,6 +113,11 @@ private:
 	SSD* ssd;
 	const int SSD_MINIMUM_ADDRESS = 0;
 	const int SSD_MAXIMUM_ADDRESS = 100;
+
+	bool didReadFail(string actual, string expected) {
+		if (actual != expected) return true;
+		return false;
+	}
 
 	bool isValidAddress(uint32_t address) {
 		if (address > 99 || address < 0) return false;
@@ -131,6 +136,4 @@ private:
 
 		return true;
 	}
-
-
 };
