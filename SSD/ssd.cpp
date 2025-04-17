@@ -1,7 +1,18 @@
 #include "ssd.h"
 #include <stdexcept>
-#include<io.h>
+#include <io.h>
 #include <fcntl.h>
+
+#define MIN_LBA (0)
+#define MAX_LBA (99)
+#define VALUE_INPUT_LENGTH (10)
+
+#define READ_ARG_NUM (3)
+#define WRITE_ARG_NUM (4)
+
+#define PARAM_CMD (1)
+#define PARAM_LBA (2)
+#define PARAM_VALUE (3)
 
 using std::exception;
 
@@ -12,7 +23,7 @@ SSD::SSD()
         FILE* fp = nullptr;
 
         if ((fopen_s(&fp, SSD_NANE_FILE_NAME, "wb+")) != 0) {
-			return;
+			exit(0);
         }
 
         uint32_t value = 0;
@@ -112,49 +123,44 @@ bool SSD::WriteToOutputFileError()
 	return true;
 }
 
-
-bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT unsigned int* pnLba, OUT unsigned int* pnValue)
+bool SSD::isValidCheckAndCastType(int argc, char* argv[], OUT CmdType* peCmd, OUT unsigned int* pnLba, OUT unsigned int* pnValue)
 {
 	bool bValid = true;
 
-	bValid = bValid && CheckCMDandNumofParam(argc, argv);
+	bValid = bValid && CheckCMDandNumofParam(argc, argv, peCmd);
 	bValid = bValid && CheckLBA(argc, argv, pnLba);
 
-	// Read
-	if (argc == 3)
+	if (argc == READ_ARG_NUM)
 	{
-		WriteToOutputFileError();
 		return bValid;
 	}
 
 	bValid = bValid && CheckValue(argc, argv, pnValue);
 	
-	if (bValid == false)
-	{
-		WriteToOutputFileError();
-	}
 	return bValid;
 }
 
-bool SSD::CheckCMDandNumofParam(int argc, char* argv[])
+bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* peCmd)
 {
-	if (argc < 2)
+	if (argc <= 1)  // no parameter
 	{
 		return false;
 	}
-	if (strcmp(argv[1], "R") == 0)
+	if (strcmp(argv[PARAM_CMD], "R") == 0)
 	{
-		if (argc != 3)
+		if (argc != READ_ARG_NUM)
 		{
 			return false;
 		}
+        *peCmd = READ;
 	}
-	else if (strcmp(argv[1], "W") == 0)
+	else if (strcmp(argv[PARAM_CMD], "W") == 0)
 	{
-		if (argc != 4)
+		if (argc != WRITE_ARG_NUM)
 		{
 			return false;
 		}
+        *peCmd = WRITE;
 	}
 	else
 	{
@@ -166,15 +172,15 @@ bool SSD::CheckCMDandNumofParam(int argc, char* argv[])
 
 bool SSD::CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba)
 {
-	for (int i=0; i<strlen(argv[2]); i++)
+	for (int i=0; i<strlen(argv[PARAM_LBA]); i++)
 	{
-		if (argv[2][i] < '0' || argv[2][i] > '9')
+		if (argv[PARAM_LBA][i] < '0' || argv[PARAM_LBA][i] > '9')
 		{
 			return false;
 		}
 	}
 
-	*pnLba = atoi(argv[2]);
+	*pnLba = atoi(argv[PARAM_LBA]);
 	if (*pnLba < MIN_LBA || *pnLba > MAX_LBA)
 	{
 		return false;
@@ -185,18 +191,18 @@ bool SSD::CheckLBA(int argc, char* argv[], OUT unsigned int* pnLba)
 
 bool SSD::CheckValue(int argc, char* argv[], OUT unsigned int* pnValue)
 {
-	if (strlen(argv[3]) != VALUE_INPUT_LENGTH)
+	if (strlen(argv[PARAM_VALUE]) != VALUE_INPUT_LENGTH)
 	{
 		return false;
 	}
-	if (argv[3][0] != '0' || argv[3][1] != 'x')
+	if (argv[PARAM_VALUE][0] != '0' || argv[PARAM_VALUE][1] != 'x')
 	{
 		return false;
 	}
 
 	char *end;
-	*pnValue = (unsigned int)strtol(argv[3], &end, 16);
-	if (end != &argv[3][VALUE_INPUT_LENGTH])
+	*pnValue = (unsigned int)strtol(argv[PARAM_VALUE], &end, 16);
+	if (end != &argv[PARAM_VALUE][VALUE_INPUT_LENGTH])
 	{
 		return false;
 	}

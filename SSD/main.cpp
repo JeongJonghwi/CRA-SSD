@@ -1,18 +1,11 @@
-#include "gmock/gmock.h"
 #include "ssd.h"
-#include <iostream>
+
+#if _DEBUG
+#include "gmock/gmock.h"
 #include <string>
-#include <stdexcept>
-
-#include<sys/types.h>
-#include<sys/stat.h>
 #include <cstdio>
-#include <filesystem>
-#include <cstring>
+#include <iostream>
 
-#define _CRT_SECURE_NO_WARNINGS
-
-using std::exception;
 using std::string;
 
 class SSDTestFixture : public ::testing::Test {
@@ -94,12 +87,13 @@ TEST_F(SSDTestFixture, checkArgumentRead) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("R");
 	argv[2] = const_cast<char*>("1");
 
 	bool expected = true;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 	EXPECT_EQ(1, lba);
 }
@@ -109,13 +103,14 @@ TEST_F(SSDTestFixture, checkArgumentWrite) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("W");
 	argv[2] = const_cast<char*>("1");
 	argv[3] = const_cast<char*>("0x12345678");
 
 	bool expected = true;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 	EXPECT_EQ(1, lba);
 	EXPECT_EQ(0x12345678, value);
@@ -126,9 +121,10 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest1) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -137,11 +133,12 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest2) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("W"); // write need totally 4 arguments
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -150,11 +147,12 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest3) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("R"); // read need totally 3 arguments
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -163,11 +161,12 @@ TEST_F(SSDTestFixture, invalidOperationTest) {
 	char* argv[3];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("C"); // not R or W
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -176,12 +175,13 @@ TEST_F(SSDTestFixture, invalidAddressRangeTest) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("R");
 	argv[2] = const_cast<char*>("100"); // LBA Range must in 0-99
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -190,13 +190,14 @@ TEST_F(SSDTestFixture, invalidValueTest) {
 	char* argv[4];
 	uint32_t lba;
 	uint32_t value;
+	CmdType eCmd;
 
 	argv[1] = const_cast<char*>("W");
 	argv[2] = const_cast<char*>("50");
 	argv[3] = const_cast<char*>("0xTTTTFFFF"); // not hexadeciamal
 
 	bool expected = false;
-	bool actual = ssd.isValidCheckAndCastType(argc, argv, &lba, &value);
+	bool actual = ssd.isValidCheckAndCastType(argc, argv, &eCmd, &lba, &value);
 	EXPECT_EQ(expected, actual);
 }
 
@@ -204,3 +205,29 @@ int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
 }
+#else
+int main(int argc, char* argv[])
+{
+	SSD ssd;
+	CmdType cmd;
+	unsigned int nLba, nValue;
+
+	if (ssd.isValidCheckAndCastType(argc, argv, &cmd, &nLba, &nValue) == false)
+	{
+		ssd.WriteToOutputFileError();
+		return 0;
+	}
+
+	switch (cmd)
+	{
+	case READ:
+		ssd.Read(nLba);
+		break;
+	case WRITE:
+		ssd.Write(nLba, nValue);
+		break;
+	}
+
+	return 0;
+}
+#endif
