@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #include "ssd.h"
 #include "gmock/gmock.h"
 #include <cstdio>
@@ -49,7 +50,7 @@ TEST_F(SSDTestFixture, checkArgumentRead)
     argv[2] = const_cast<char*>("1");
 
     bool expected = true;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
     EXPECT_EQ(1, lba);
 }
@@ -67,7 +68,7 @@ TEST_F(SSDTestFixture, checkArgumentWrite)
     argv[3] = const_cast<char*>("0x12345678");
 
     bool expected = true;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
     EXPECT_EQ(1, lba);
     EXPECT_EQ(0x12345678, value);
@@ -82,7 +83,7 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest1)
     CmdType cmd;
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -97,7 +98,7 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest2)
     argv[1] = const_cast<char*>("W");
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -112,7 +113,7 @@ TEST_F(SSDTestFixture, invalidArgumentsCountTest3)
     argv[1] = const_cast<char*>("R");
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -127,7 +128,7 @@ TEST_F(SSDTestFixture, invalidOperationTest)
     argv[1] = const_cast<char*>("C");
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -143,7 +144,7 @@ TEST_F(SSDTestFixture, invalidAddressRangeTest)
     argv[2] = const_cast<char*>("100");
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -160,7 +161,7 @@ TEST_F(SSDTestFixture, invalidValueTest)
     argv[3] = const_cast<char*>("0xTTTTFFFF");
 
     bool expected = false;
-    bool actual = ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    bool actual = ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, actual);
 }
 
@@ -177,7 +178,7 @@ TEST_F(SSDTestFixture, MixCapitalSmallTest)
     argv[3] = const_cast<char*>("0xAaAaAaAa");
 
     uint32_t expected = 0xaaaaaaaa;
-    ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
+    ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value);
     EXPECT_EQ(expected, value);
 }
 
@@ -241,3 +242,4 @@ TEST_F(SSDTestFixture, eraseWithFile)
 
     EXPECT_EQ(expected, actual);
 }
+#endif

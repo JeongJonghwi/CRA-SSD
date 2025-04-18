@@ -1,8 +1,6 @@
 #include "ssd.h"
 #include <fcntl.h>
 #include <io.h>
-#include <windows.h>
-#include <format>
 
 #define MIN_LBA (0)
 #define MAX_LBA (99)
@@ -23,8 +21,58 @@ SSD::SSD()
     if (_access_s(SSD_NAND_FILE_NAME, 0) == 0)
         return;
 
-    InitializeNandFile();
-    InitalizeCommandBuffer();
+    FILE* fp = nullptr;
+
+    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
+        exit(0);
+    }
+
+    uint32_t nandBuff[MAX_LBA + 1];
+
+    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
+    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
+
+    fflush(fp);
+    fclose(fp);
+}
+
+bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value)
+{
+    bool valid = true;
+
+    valid = valid && CheckCMDandNumofParam(argc, argv, cmd);
+    valid = valid && CheckLBA(argc, argv, lba);
+
+    if (*cmd == READ) {
+        return valid;
+    }
+
+    if (*cmd == WRITE) {
+        valid = valid && CheckValue(argc, argv, value);
+    } else {    // ERASE
+        valid = valid && CheckCount(argc, argv, value);
+    }
+
+    return valid;
+}
+
+bool SSD::WriteToOutputFileError()
+{
+    FILE* fp = nullptr;
+
+    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+        return false;
+    }
+
+    if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
+        fclose(fp);
+        return false;
+    }
+
+    fflush(fp);
+    fclose(fp);
+
+    return true;
 }
 
 bool SSD::Read(uint32_t lba)
@@ -86,63 +134,6 @@ bool SSD::Erase(uint32_t lba, uint32_t count)
     return true;
 }
 
-bool SSD::ReadLbaFromSsd(uint32_t lba, uint32_t& readValue)
-{
-    FILE* fp = nullptr;
-
-    if (fopen_s(&fp, SSD_NAND_FILE_NAME, "rb") != 0) {
-        return false;
-    }
-
-    if (fseek(fp, lba * sizeof(uint32_t), SEEK_SET) != 0) {
-        fclose(fp);
-        return false;
-    }
-
-    fread(&readValue, sizeof(uint32_t), 1, fp);
-    fclose(fp);
-
-    return true;
-}
-
-bool SSD::WriteToOutputFile(uint32_t readValue)
-{
-    FILE* fp = nullptr;
-
-    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
-        return false;
-    }
-
-    if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
-        fclose(fp);
-        return false;
-    }
-
-    fflush(fp);
-    fclose(fp);
-
-    return true;
-}
-
-bool SSD::WriteToOutputFileError()
-{
-    FILE* fp = nullptr;
-
-    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
-        return false;
-    }
-
-    if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
-        fclose(fp);
-        return false;
-    }
-
-    fflush(fp);
-    fclose(fp);
-
-    return true;
-}
-
 void SSD::InitializeNandFile() {
     FILE* fp = nullptr;
 
@@ -157,59 +148,6 @@ void SSD::InitializeNandFile() {
 
     fflush(fp);
     fclose(fp);
-}
-
-void SSD::CreateEmptyFile(const char* fileName) {
-    FILE* fp = nullptr;
-
-    if ((fopen_s(&fp, fileName, "w+")) != 0) {
-        return;
-    }
-
-    fclose(fp);
-}
-
-bool SSD::IsDirectoryNotExists(const std::string& path) {
-    std::wstring directoryPath;
-    directoryPath.assign(path.begin(), path.end());
-    DWORD attributes = GetFileAttributes(directoryPath.c_str());
-    return (attributes == INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-void SSD::InitalizeCommandBuffer() {
-    if (IsDirectoryNotExists(SSD_COMMAND_FOLDER)) {
-
-        string path { SSD_COMMAND_FOLDER };
-        std::wstring directoryPath;
-        directoryPath.assign(path.begin(), path.end());
-
-        CreateDirectory(directoryPath.c_str(), NULL);
-        for (int i = 1; i <= 5; i++) {
-            string fileName { SSD_COMMAND_FOLDER };
-            fileName += "\\" + std::to_string(i) + "_empty";
-            CreateEmptyFile(fileName.c_str());
-        }
-    }
-}
-
-bool SSD::IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value)
-{
-    bool valid = true;
-
-    valid = valid && CheckCMDandNumofParam(argc, argv, cmd);
-    valid = valid && CheckLBA(argc, argv, lba);
-
-    if (*cmd == READ) {
-        return valid;
-    }
-
-    if (*cmd == WRITE) {
-        valid = valid && CheckValue(argc, argv, value);
-    } else {
-        valid = valid && CheckCount(argc, argv, value);
-    }
-
-    return valid;
 }
 
 bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd)
@@ -285,6 +223,44 @@ bool SSD::CheckCount(int argc, char* argv[], OUT uint32_t* count)
     if (*count < MIN_COUNT || *count > MAX_COUNT) {
         return false;
     }
+
+    return true;
+}
+
+bool SSD::ReadLbaFromSsd(uint32_t lba, uint32_t& readValue)
+{
+    FILE* fp = nullptr;
+
+    if (fopen_s(&fp, SSD_NAND_FILE_NAME, "rb") != 0) {
+        return false;
+    }
+
+    if (fseek(fp, lba * sizeof(uint32_t), SEEK_SET) != 0) {
+        fclose(fp);
+        return false;
+    }
+
+    fread(&readValue, sizeof(uint32_t), 1, fp);
+    fclose(fp);
+
+    return true;
+}
+
+bool SSD::WriteToOutputFile(uint32_t readValue)
+{
+    FILE* fp = nullptr;
+
+    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+        return false;
+    }
+
+    if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
+        fclose(fp);
+        return false;
+    }
+
+    fflush(fp);
+    fclose(fp);
 
     return true;
 }
