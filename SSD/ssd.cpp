@@ -85,9 +85,9 @@ bool SSD::Erase(uint32_t lba, uint32_t count)
         return false;
     }
 
-    uint32_t value[MAX_LBA];
-    memset(&value, 0, sizeof(uint32_t) * count);
-    fwrite(&value, sizeof(uint32_t), count, fp);
+    uint32_t value[MAX_COUNT + 1];
+    memset(value, 0, sizeof(uint32_t) * count);
+    fwrite(value, sizeof(uint32_t), count, fp);
     fflush(fp);
 
     fclose(fp);
@@ -165,7 +165,7 @@ bool SSD::IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT 
 
     if (*cmd == WRITE) {
         valid = valid && CheckValue(argc, argv, value);
-    } else {    // ERASE
+    } else {
         valid = valid && CheckCount(argc, argv, value);
     }
 

@@ -13,11 +13,9 @@ public:
     {
         std::string command = exeDir + "/SSD.exe R " + std::to_string(address);
 
-        FILE* pipe = _popen(command.c_str(), "r");
-        if (!pipe)
+        int result = system(command.c_str());
+        if (result)
             return "ERROR";
-
-        _pclose(pipe);
 
         FILE* file = nullptr;
         errno_t err = fopen_s(&file, "ssd_output.txt", "r");
@@ -39,6 +37,21 @@ public:
     void write(uint32_t address, string value)
     {
         std::string command = exeDir + "/SSD.exe W " + std::to_string(address) + " " + value;
+        system(command.c_str());
+    }
+
+    void erase(uint32_t address, uint32_t size)
+    {
+        while (size > 10) {
+            std::string command = exeDir + "/SSD.exe E " + std::to_string(address) + " 10";
+            FILE* pipe = _popen(command.c_str(), "r");
+            if (pipe)
+                _pclose(pipe);
+
+            size -= 10;
+            address += 10;
+        }
+        std::string command = exeDir + "/SSD.exe E " + std::to_string(address) + " " + std::to_string(size);
         FILE* pipe = _popen(command.c_str(), "r");
         if (pipe)
             _pclose(pipe);
