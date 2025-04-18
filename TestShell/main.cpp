@@ -54,13 +54,13 @@ int main(void)
             } else if (command == "exit") {
                 return 0;
             } else if (command == "1_" || command == "1_FullWriteAndReadCompare") {
-                std::cout << script.fullWriteAndReadCompare() << std::endl;
+                runner.testRun("1_");
             } else if (command == "2_" || command == "2_PartialLBAWrite") {
-                std::cout << script.partialLBAWrite("0xFFFFFFFF") << std::endl;
+                runner.testRun("2_");
             } else if (command == "3_" || command == "3_WriteReadAging") {
-                std::cout << script.writeReadAging(randomValue()) << std::endl;
+                runner.testRun("3_");
             } else if (command == "4_" || command == "4_EraseAndWriteAging") {
-                std::cout << script.writeReadAging(randomValue()) << std::endl;
+                runner.testRun("4_");
             }
         } else if (runner.isTestFile(input)) {
             runner.txtFileTestRun(input);

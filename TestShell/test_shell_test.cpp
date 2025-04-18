@@ -1,4 +1,5 @@
-#include "interface.h"
+#include "ssd_interface.h"
+#include "test_script_interface.h"
 #include "real_ssd.h"
 #include "shell.cpp"
 #include "testscript.cpp"
@@ -309,6 +310,36 @@ TEST_F(SSDFixture, writeWithRealSSD)
 {
     string expected = "Done";
     string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
+
+    EXPECT_EQ(expected, actual);
+}
+
+typedef ITestScript* (*CreateScriptFunc)(SSD*);
+
+TEST(TestScriptDLL, dllRunTest)
+{
+    MockSSD ssd;
+    EXPECT_CALL(ssd, read(_))
+        .Times(1)
+        .WillRepeatedly(Return("0x10000000"));
+
+    HMODULE hDll = LoadLibraryA("TestScript.dll");
+    
+    if (!hDll) {
+        std::cerr << "Failed to load DLL!" << std::endl;
+    }
+
+    string scriptName = "CreateScript_1_FullWriteAndReadCompare";
+    CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
+    if (!createScript) {
+        std::cerr << "Failed to get CreateScript function!" << std::endl;
+    }
+
+    ITestScript* script = createScript(&ssd);
+    string actual = script->Run();
+    delete script;
+    FreeLibrary(hDll);
+    string expected = "Run In DLL";
 
     EXPECT_EQ(expected, actual);
 }
