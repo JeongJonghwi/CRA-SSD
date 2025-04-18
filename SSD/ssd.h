@@ -16,6 +16,7 @@ using std::string;
 enum CmdType {
     READ,
     WRITE,
+    ERASE,
 };
 
 class SSD {
@@ -36,4 +37,5 @@ private:
     bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd);
     bool CheckLBA(int argc, char* argv[], OUT uint32_t* lba);
     bool CheckValue(int argc, char* argv[], OUT uint32_t* value);
+    bool CheckCount(int argc, char* argv[], OUT uint32_t* count);
 };
