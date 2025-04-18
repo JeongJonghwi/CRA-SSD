@@ -26,6 +26,7 @@ public:
 
     bool Read(uint32_t lba);
     bool Write(uint32_t lba, uint32_t value);
+    bool Erase(uint32_t lba, uint32_t count);
     bool ReadLbaFromSsd(uint32_t lba, uint32_t& readValue);
     bool WriteToOutputFile(uint32_t readValue);
     bool WriteToOutputFileError();
