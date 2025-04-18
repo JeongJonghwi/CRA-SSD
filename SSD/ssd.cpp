@@ -1,6 +1,8 @@
 #include "ssd.h"
 #include <fcntl.h>
 #include <io.h>
+#include <windows.h>
+#include <format>
 
 #define MIN_LBA (0)
 #define MAX_LBA (99)
@@ -21,19 +23,8 @@ SSD::SSD()
     if (_access_s(SSD_NAND_FILE_NAME, 0) == 0)
         return;
 
-    FILE* fp = nullptr;
-
-    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
-        exit(0);
-    }
-
-    uint32_t nandBuff[MAX_LBA + 1];
-
-    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
-    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
-
-    fflush(fp);
-    fclose(fp);
+    InitializeNandFile();
+    InitalizeCommandBuffer();
 }
 
 bool SSD::Read(uint32_t lba)
@@ -150,6 +141,55 @@ bool SSD::WriteToOutputFileError()
     fclose(fp);
 
     return true;
+}
+
+void SSD::InitializeNandFile() {
+    FILE* fp = nullptr;
+
+    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
+        exit(0);
+    }
+
+    uint32_t nandBuff[MAX_LBA + 1];
+
+    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
+    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
+
+    fflush(fp);
+    fclose(fp);
+}
+
+void SSD::CreateEmptyFile(const char* fileName) {
+    FILE* fp = nullptr;
+
+    if ((fopen_s(&fp, fileName, "w+")) != 0) {
+        return;
+    }
+
+    fclose(fp);
+}
+
+bool SSD::IsDirectoryNotExists(const std::string& path) {
+    std::wstring directoryPath;
+    directoryPath.assign(path.begin(), path.end());
+    DWORD attributes = GetFileAttributes(directoryPath.c_str());
+    return (attributes == INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+void SSD::InitalizeCommandBuffer() {
+    if (IsDirectoryNotExists(SSD_COMMAND_FOLDER)) {
+
+        string path { SSD_COMMAND_FOLDER };
+        std::wstring directoryPath;
+        directoryPath.assign(path.begin(), path.end());
+
+        CreateDirectory(directoryPath.c_str(), NULL);
+        for (int i = 1; i <= 5; i++) {
+            string fileName { SSD_COMMAND_FOLDER };
+            fileName += "\\" + std::to_string(i) + "_empty";
+            CreateEmptyFile(fileName.c_str());
+        }
+    }
 }
 
 bool SSD::IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value)
