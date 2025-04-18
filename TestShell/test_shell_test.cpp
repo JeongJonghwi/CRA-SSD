@@ -1,6 +1,7 @@
 #include "interface.h"
 #include "real_ssd.h"
-#include "test_shell.cpp"
+#include "shell.cpp"
+#include "testscript.cpp"
 #include "gmock/gmock.h"
 #include <string>
 
@@ -23,6 +24,7 @@ class TestFixture : public Test {
 public:
     MockSSD ssd;
     TestShell ts { &ssd };
+    TestScript script { &ssd };
 };
 
 class SSDFixture : public Test {
@@ -134,7 +136,7 @@ TEST_F(ShellTestScriptFixture, groupWriteAndReadCompare)
     EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return(VALID_VALUE));
 
     string expected = "PASS";
-    string actual = ts.groupWriteAndReadCompare(5, 10, VALID_VALUE);
+    string actual = script.groupWriteAndReadCompare(5, 10, VALID_VALUE);
     EXPECT_EQ(expected, actual);
 }
 
@@ -148,7 +150,7 @@ TEST_F(ShellTestScriptFixture, partialLBAWriteTest)
         .WillRepeatedly(Return(VALID_VALUE));
 
     string expected = "PASS";
-    string actual = ts.partialLBAWrite(VALID_VALUE);
+    string actual = script.partialLBAWrite(VALID_VALUE);
     EXPECT_EQ(expected, actual);
 }
 
@@ -167,7 +169,7 @@ TEST_F(ShellTestScriptFixture, writeReadAging)
     EXPECT_CALL(ssd, write(99, _)).Times(200);
 
     string expected = "PASS";
-    string actual = ts.writeReadAging(VALID_VALUE);
+    string actual = script.writeReadAging(VALID_VALUE);
     EXPECT_EQ(expected, actual);
 }
 
@@ -186,10 +188,9 @@ TEST_F(ShellTestScriptFixture, eraseAndWriteAging)
     }
 
     string expected = "PASS";
-    string actual = ts.eraseAndWriteAging();
+    string actual = script.eraseAndWriteAging();
     EXPECT_EQ(expected, actual);
 }
-
 
 TEST_F(InvalidCMDTestFixture, invalidCommandTest)
 {

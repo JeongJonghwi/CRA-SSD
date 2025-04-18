@@ -135,12 +135,15 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"> %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'"> %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="test_shell.cpp" />
+    <ClCompile Include="testscript.cpp" />
+    <ClCompile Include="testscript_runner.cpp" />
+    <ClCompile Include="shell.cpp" />
     <ClCompile Include="test_shell_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="interface.h" />
     <ClInclude Include="real_ssd.h" />
+    <ClInclude Include="testscript_runner.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

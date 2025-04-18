@@ -1,80 +1,13 @@
-#include "cmd.cpp"
 #include "interface.h"
 #include "gmock/gmock.h"
 #include <string>
 #include <vector>
 
-class TestShell {
+class TestScript {
 public:
-    TestShell(SSD* ssd)
+    TestScript(SSD* ssd)
         : ssd(ssd)
     {
-    }
-
-    string read(uint32_t address)
-    {
-        if (!isValidAddress(address))
-            return "ERROR";
-        return ssd->read(address);
-    }
-
-    string write(uint32_t address, string value)
-    {
-        if (!isValidAddress(address))
-            return "ERROR";
-        if (!isValidValue(value))
-            return "ERROR";
-
-        ssd->write(address, value);
-        return "Done";
-    }
-
-    string help()
-    {
-        string ret = "Team CodeCraft: ";
-        ret += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
-        ret += "write: write {value} to {address}\n";
-        ret += "read: read from {address}\n";
-        ret += "fullwrite: write {value} to 0x0 ~ 0x100\n";
-        ret += "fullread: read from all 0x0 ~ 0x100\n";
-        ret += "help: print this message\n";
-        ret += "exit: exit TestShell\n";
-        return ret;
-    }
-
-    string exit()
-    {
-        return "Exit TestShell";
-    }
-
-    string fullWrite(string value)
-    {
-        if (!isValidValue(value))
-            return "ERROR";
-        for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
-            ssd->write(i, value);
-        }
-        return "Done";
-    }
-
-    string fullRead()
-    {
-        string ret = "";
-        for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
-            ret += ssd->read(i);
-            ret += "\n";
-        }
-        return ret;
-    }
-
-    string erase(int address, int size) {
-        if (!isValidAddress(address))
-            return "ERROR";
-        if (size < 0)
-            return "ERROR";
-        ssd->erase(address, size);
-
-        return "Done";
     }
 
     string fullWriteAndReadCompare()
@@ -159,13 +92,6 @@ public:
         }
         return "PASS";
     }
-
-    bool isValidCommandAndArgument(string command)
-    {
-        CMD cmd;
-        return cmd.validCheck(command);
-    }
-
 private:
     SSD* ssd;
     const int SSD_MINIMUM_ADDRESS = 0;
@@ -177,13 +103,6 @@ private:
         if (actual != expected)
             return true;
         return false;
-    }
-
-    bool isValidAddress(uint32_t address)
-    {
-        if (address > 99 || address < 0)
-            return false;
-        return true;
     }
 
     bool isValidValue(string value)

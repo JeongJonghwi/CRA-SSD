@@ -1,6 +1,6 @@
 #include "real_ssd.h"
-#include "test_shell.cpp"
-#include <random>
+#include "shell.cpp"
+#include "testscript_runner.h"
 
 #ifdef _DEBUG
 #include "gmock/gmock.h"
@@ -24,6 +24,7 @@ int main(void)
 {
     RealSSD ssd;
     TestShell test_shell(&ssd);
+    TestScript script(&ssd);
 
     while (1) {
         string input;
@@ -31,6 +32,8 @@ int main(void)
         std::getline(std::cin, input);
 
         CMD cmd;
+        TestScriptRunner runner(&ssd);
+
         if (cmd.validCheck(input)) {
             string command = cmd.getCommand();
 
@@ -51,13 +54,17 @@ int main(void)
             } else if (command == "exit") {
                 return 0;
             } else if (command == "1_" || command == "1_FullWriteAndReadCompare") {
-                std::cout << test_shell.fullWriteAndReadCompare() << std::endl;
+                std::cout << script.fullWriteAndReadCompare() << std::endl;
             } else if (command == "2_" || command == "2_PartialLBAWrite") {
-                std::cout << test_shell.partialLBAWrite("0xFFFFFFFF") << std::endl;
+                std::cout << script.partialLBAWrite("0xFFFFFFFF") << std::endl;
             } else if (command == "3_" || command == "3_WriteReadAging") {
-                std::cout << test_shell.writeReadAging(randomValue()) << std::endl;
+                std::cout << script.writeReadAging(randomValue()) << std::endl;
+            } else if (command == "4_" || command == "4_EraseAndWriteAging") {
+                std::cout << script.writeReadAging(randomValue()) << std::endl;
             }
-        } else
+        } else if (runner.isTestFile(input)) {
+            runner.txtFileTestRun(input);
+        } else 
             std::cout << "INVALID COMMAND" << std::endl;
     }
 }
