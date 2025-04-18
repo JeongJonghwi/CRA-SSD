@@ -85,7 +85,8 @@ bool SSD::Erase(uint32_t lba, uint32_t count)
         return false;
     }
 
-    int value = 0;
+    uint32_t value[MAX_LBA];
+    memset(&value, 0, sizeof(uint32_t) * count);
     fwrite(&value, sizeof(uint32_t), count, fp);
     fflush(fp);
 
