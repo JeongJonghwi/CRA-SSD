@@ -57,10 +57,33 @@ bool SSD::Write(uint32_t lba, uint32_t value)
     }
 
     if (fseek(fp, lba * sizeof(uint32_t), SEEK_SET) != 0) {
+        fclose(fp);
         return false;
     }
 
     fwrite(&value, sizeof(uint32_t), 1, fp);
+    fflush(fp);
+
+    fclose(fp);
+
+    return true;
+}
+
+bool SSD::Erase(uint32_t lba, uint32_t count)
+{
+    FILE* fp = nullptr;
+
+    if (fopen_s(&fp, SSD_NAND_FILE_NAME, "r+b") != 0) {
+        return false;
+    }
+
+    if (fseek(fp, lba * sizeof(uint32_t), SEEK_SET) != 0) {
+        fclose(fp);
+        return false;
+    }
+
+    int value = 0;
+    fwrite(&value, sizeof(uint32_t), count, fp);
     fflush(fp);
 
     fclose(fp);
@@ -77,6 +100,7 @@ bool SSD::ReadLbaFromSsd(uint32_t lba, uint32_t& readValue)
     }
 
     if (fseek(fp, lba * sizeof(uint32_t), SEEK_SET) != 0) {
+        fclose(fp);
         return false;
     }
 
@@ -95,6 +119,7 @@ bool SSD::WriteToOutputFile(uint32_t readValue)
     }
 
     if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
+        fclose(fp);
         return false;
     }
 
@@ -113,6 +138,7 @@ bool SSD::WriteToOutputFileError()
     }
 
     if (fprintf(fp, "%s", SSD_ERROR_STRING) != VALUE_INPUT_LENGTH) {
+        fclose(fp);
         return false;
     }
 

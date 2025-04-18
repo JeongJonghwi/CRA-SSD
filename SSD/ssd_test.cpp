@@ -229,3 +229,15 @@ TEST_F(SSDTestFixture, readWithFile)
 
     EXPECT_EQ(expected, actual);
 }
+
+TEST_F(SSDTestFixture, eraseWithFile)
+{
+    uint32_t lba = 1;
+    string expected { "0x00000000" };
+
+    ssd.Erase(lba, 1);
+    ssd.Read(lba);
+    string actual = getSsdLbaValue(lba);
+
+    EXPECT_EQ(expected, actual);
+}
