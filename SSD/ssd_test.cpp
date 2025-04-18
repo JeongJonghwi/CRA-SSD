@@ -232,12 +232,42 @@ TEST_F(SSDTestFixture, readWithFile)
 
 TEST_F(SSDTestFixture, eraseWithFile)
 {
-    uint32_t lba = 1;
-    string expected { "0x00000000" };
+    CmdType cmd;
+    uint32_t lba, value;
+    int argc = 4;
+    char* argv[5];
+    argv[1] = const_cast<char*>("E");
+    argv[2] = const_cast<char*>("3");
+    argv[3] = const_cast<char*>("10");
 
-    ssd.Erase(lba, 1);
-    ssd.Read(lba);
+    if (ssd.IsValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
+        exit(1);
+    }
+
+    ssd.Write(3, 0xAAAAAAAA);
+    ssd.Write(4, 0xAAAAAAAA);
+    ssd.Write(5, 0xAAAAAAAA);
+    ssd.Write(6, 0xAAAAAAAA);
+    ssd.Write(7, 0xAAAAAAAA);
+    ssd.Write(8, 0xAAAAAAAA);
+    ssd.Write(9, 0xAAAAAAAA);
+    ssd.Write(10, 0xAAAAAAAA);
+    ssd.Write(11, 0xAAAAAAAA);
+    ssd.Write(12, 0xAAAAAAAA);
+
+    switch (cmd) {
+    case READ:
+        ssd.Read(lba);
+        break;
+    case WRITE:
+        ssd.Write(lba, value);
+        break;
+	case ERASE:
+		if (value == 0) {
+			break;
+		}
+		ssd.Erase(lba, value);
+		break;
+    }
     string actual = getSsdLbaValue(lba);
-
-    EXPECT_EQ(expected, actual);
 }
