@@ -130,11 +130,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="command_buffer_manager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ssd.cpp" />
     <ClCompile Include="ssd_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="command_buffer_manager.h" />
     <ClInclude Include="ssd.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
