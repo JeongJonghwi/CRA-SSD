@@ -67,6 +67,16 @@ public:
         return ret;
     }
 
+    string erase(int address, int size) {
+        if (!isValidAddress(address))
+            return "ERROR";
+        if (size < 0)
+            return "ERROR";
+        ssd->erase(address, size);
+
+        return "Done";
+    }
+
     string fullWriteAndReadCompare()
     {
         for (int groupStart = SSD_MINIMUM_ADDRESS; groupStart < SSD_MAXIMUM_ADDRESS; groupStart += 5) {
@@ -111,6 +121,29 @@ public:
             if (didReadFail(ssd->read(0), ssd->read(99)))
                 return "FAIL";
         }
+        return "PASS";
+    }
+
+    string eraseAndWriteAging()
+    {
+        ssd->erase(0, 3);
+        for (int i = 0; i < 30; i++) {
+            for (int startAddr = 2; startAddr <= 96; startAddr += 2) {
+                ssd->write(startAddr, "0x12345678");
+                ssd->write(startAddr, "0x87654321");
+                ssd->erase(startAddr, 3);
+
+                if (didReadFail(ssd->read(startAddr), "0x00000000"))
+                    return "FAIL";
+
+                if (didReadFail(ssd->read(startAddr + 1), "0x00000000"))
+                    return "FAIL";
+
+                if (didReadFail(ssd->read(startAddr + 2), "0x00000000"))
+                    return "FAIL";
+            }
+        }
+
         return "PASS";
     }
 

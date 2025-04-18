@@ -16,6 +16,7 @@ class MockSSD : public SSD {
 public:
     MOCK_METHOD(string, read, (uint32_t address), (override));
     MOCK_METHOD(void, write, (uint32_t address, string value), (override));
+    MOCK_METHOD(void, erase, (uint32_t address, uint32_t size), (override));
 };
 
 class TestFixture : public Test {
@@ -169,6 +170,26 @@ TEST_F(ShellTestScriptFixture, writeReadAging)
     string actual = ts.writeReadAging(VALID_VALUE);
     EXPECT_EQ(expected, actual);
 }
+
+
+TEST_F(ShellTestScriptFixture, eraseAndWriteAging)
+{
+    for (int addr = 0; addr < 99; addr++) {
+        EXPECT_CALL(ssd, read(addr)).WillRepeatedly(Return("0x00000000"));
+    }
+
+    EXPECT_CALL(ssd, erase(0, 3)).Times(1);
+
+    for (int startAddr = 2; startAddr <= 96; startAddr += 2) {
+        EXPECT_CALL(ssd, write(startAddr, _)).Times(60);
+        EXPECT_CALL(ssd, erase(startAddr, 3)).Times(30);
+    }
+
+    string expected = "PASS";
+    string actual = ts.eraseAndWriteAging();
+    EXPECT_EQ(expected, actual);
+}
+
 
 TEST_F(InvalidCMDTestFixture, invalidCommandTest)
 {
