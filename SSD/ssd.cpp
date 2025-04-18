@@ -75,6 +75,25 @@ bool SSD::WriteToOutputFileError()
     return true;
 }
 
+bool SSD::WriteToOutputFile(uint32_t readValue)
+{
+    FILE* fp = nullptr;
+
+    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
+        return false;
+    }
+
+    if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
+        fclose(fp);
+        return false;
+    }
+
+    fflush(fp);
+    fclose(fp);
+
+    return true;
+}
+
 bool SSD::Read(uint32_t lba)
 {
     uint32_t readValue = 0;
@@ -134,6 +153,19 @@ bool SSD::Erase(uint32_t lba, uint32_t count)
     return true;
 }
 
+CmdType SSD::GetCmdType(const string& str)
+{
+    CmdType ret = INVALID_CMD;
+
+    for (int type=CMD_START; type<CMD_COUNT; type++) {
+        if (cmd_symbol[type] == str) {
+            ret = static_cast<CmdType>(type);
+        }
+    }
+
+    return ret;
+}
+
 void SSD::InitializeNandFile() {
     FILE* fp = nullptr;
 
@@ -155,21 +187,20 @@ bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd)
     if (argc <= 1)
         return false;
 
-    if (strcmp(argv[PARAM_CMD], "R") == 0) {
+    *cmd = GetCmdType(argv[PARAM_CMD]);
+
+    if (*cmd == READ) {
         if (argc != READ_ARG_NUM) {
             return false;
         }
-        *cmd = READ;
-    } else if (strcmp(argv[PARAM_CMD], "W") == 0) {
+    } else if (*cmd == WRITE) {
         if (argc != WRITE_ARG_NUM) {
             return false;
         }
-        *cmd = WRITE;
-    } else if (strcmp(argv[PARAM_CMD], "E") == 0) {
+    } else if (*cmd == ERASE) {
         if (argc != ERASE_ARG_NUM) {
             return false;
         }
-        *cmd = ERASE;
     } else {
         return false;
     }
@@ -241,25 +272,6 @@ bool SSD::ReadLbaFromSsd(uint32_t lba, uint32_t& readValue)
     }
 
     fread(&readValue, sizeof(uint32_t), 1, fp);
-    fclose(fp);
-
-    return true;
-}
-
-bool SSD::WriteToOutputFile(uint32_t readValue)
-{
-    FILE* fp = nullptr;
-
-    if (fopen_s(&fp, SSD_OUTPUT_FILE_NAME, "w+") != 0) {
-        return false;
-    }
-
-    if (fprintf(fp, "0x%08X", readValue) != VALUE_INPUT_LENGTH) {
-        fclose(fp);
-        return false;
-    }
-
-    fflush(fp);
     fclose(fp);
 
     return true;

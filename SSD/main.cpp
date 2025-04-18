@@ -1,4 +1,5 @@
 #include "ssd.h"
+#include "command_buffer_manager.h"
 
 #ifdef _DEBUG
 #include "gmock/gmock.h"
@@ -13,7 +14,7 @@ int main(int argc, char* argv[])
 {
     SSD ssd;
     CmdType cmd;
-    // CommandBufferManager buffermanager;
+    CommandBufferManager buffermanager;
     uint32_t lba, value;
 
     if (ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
@@ -24,8 +25,15 @@ int main(int argc, char* argv[])
     switch (cmd) {
     case READ:
     {
-        // buffermanager.
-        ssd.Read(lba);
+        uint32_t readValue;
+        if (buffermanager.FastRead(lba, readValue)) {
+            if (ssd.WriteToOutputFile(readValue) == false) {
+                return 0;
+            }
+        }
+        else {
+            ssd.Read(lba);
+        }
         break;
     }
     case WRITE:
