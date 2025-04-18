@@ -1,6 +1,9 @@
 #include "testscript_runner.h"
+#include "test_script_interface.h"
 #include <fstream>
 #include <iostream>
+
+typedef ITestScript* (*CreateScriptFunc)(SSD*);
 
 bool TestScriptRunner::isTestFile(string txt)
 {
@@ -40,20 +43,25 @@ string TestScriptRunner::randomValue()
 
 bool TestScriptRunner::testRun(string command)
 {
-    TestScript script(ssd);
-    string result = "";
-    if (command == "1_" || command == "1_FullWriteAndReadCompare") {
-        result = script.fullWriteAndReadCompare();
+    HMODULE hDll = LoadLibraryA("TestScript.dll");
 
-    } else if (command == "2_" || command == "2_PartialLBAWrite") {
-        result = script.partialLBAWrite("0xFFFFFFFF");
-
-    } else if (command == "3_" || command == "3_WriteReadAging") {
-        result = script.writeReadAging(randomValue());
-
-    } else if (command == "4_" || command == "4_EraseAndWriteAging") {
-        result = script.eraseAndWriteAging();
+    if (!hDll) {
+        std::cerr << "Failed to load DLL!" << std::endl;
     }
+
+    string scriptName = "CreateScript_" + command;
+    CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
+    if (!createScript) {
+        std::cerr << "Failed to get CreateScript function!" << std::endl;
+    }
+
+    ITestScript* script = createScript(ssd);
+    string result = script->Run();
+    delete script;
+    FreeLibrary(hDll);
+
+    std::cout << result << std::endl;
+
     if (result == "PASS")
         return true;
     return false;

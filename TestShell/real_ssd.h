@@ -1,5 +1,5 @@
 #pragma once
-#include "interface.h"
+#include "ssd_interface.h"
 #include <windows.h>
 
 using std::to_string;
