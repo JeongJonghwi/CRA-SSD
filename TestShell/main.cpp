@@ -1,7 +1,6 @@
 #include "real_ssd.h"
 #include "shell.cpp"
 #include "testscript_runner.h"
-#include "Logger.h"
 
 #ifdef _DEBUG
 #include "gmock/gmock.h"
