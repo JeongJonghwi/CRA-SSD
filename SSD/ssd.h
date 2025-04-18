@@ -4,6 +4,7 @@
 #include <cstring>
 #include <stdint.h>
 #include <string>
+#include <iostream>
 
 #define OUT
 
@@ -12,6 +13,7 @@ using std::string;
 #define SSD_NAND_FILE_NAME "ssd_nand.txt"
 #define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
 #define SSD_ERROR_STRING "ERROR"
+#define SSD_COMMAND_FOLDER "Buffer"
 
 enum CmdType {
     READ,
@@ -38,4 +40,11 @@ private:
     bool CheckLBA(int argc, char* argv[], OUT uint32_t* lba);
     bool CheckValue(int argc, char* argv[], OUT uint32_t* value);
     bool CheckCount(int argc, char* argv[], OUT uint32_t* count);
+
+    void InitializeNandFile();
+    void InitalizeCommandBuffer();
+    bool IsDirectoryNotExists(const std::string& path);
+    bool CreateDirectoryIfNotExists(const std::string& path);
+    bool IsFileExists(const std::wstring& file);
+    void CreateEmptyFile(const char* fileName);
 };
