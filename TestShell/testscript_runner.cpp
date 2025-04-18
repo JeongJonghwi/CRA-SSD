@@ -1,6 +1,6 @@
+#include "testscript_runner.h"
 #include <fstream>
 #include <iostream>
-#include "testscript_runner.h"
 
 bool TestScriptRunner::isTestFile(string txt)
 {
@@ -21,11 +21,11 @@ void TestScriptRunner::txtFileTestRun(string filename)
             continue;
         }
         std::cout << cmd << "\t___\tRun...";
-        if (!testRun(cmd)){
+        if (!testRun(cmd)) {
             std::cout << "Fail!\n";
             break;
         }
-        std::cout <<"Pass\n";
+        std::cout << "Pass\n";
     }
 }
 
@@ -40,7 +40,22 @@ string TestScriptRunner::randomValue()
 
 bool TestScriptRunner::testRun(string command)
 {
+    TestScript script(ssd);
+    string result = "";
+    if (command == "1_" || command == "1_FullWriteAndReadCompare") {
+        result = script.fullWriteAndReadCompare();
 
+    } else if (command == "2_" || command == "2_PartialLBAWrite") {
+        result = script.partialLBAWrite("0xFFFFFFFF");
+
+    } else if (command == "3_" || command == "3_WriteReadAging") {
+        result = script.writeReadAging(randomValue());
+
+    } else if (command == "4_" || command == "4_EraseAndWriteAging") {
+        result = script.eraseAndWriteAging();
+    }
+    if (result == "PASS")
+        return true;
     return false;
 }
 
