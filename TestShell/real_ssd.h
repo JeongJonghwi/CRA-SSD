@@ -49,7 +49,7 @@ private:
         system((exeFile + command).c_str());
     }
 
-    const string& ReadFromOutputFile()
+    string ReadFromOutputFile()
     {
         FILE* file = nullptr;
         errno_t err = fopen_s(&file, "ssd_output.txt", "r");
