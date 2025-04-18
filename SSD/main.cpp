@@ -27,6 +27,12 @@ int main(int argc, char* argv[])
     case WRITE:
         ssd.Write(lba, value);
         break;
+	case ERASE:
+		if (value == 0) {
+			break;
+		}
+		ssd.Erase(lba, value);
+		break;
     }
 
     return 0;

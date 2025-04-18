@@ -5,9 +5,12 @@
 #define MIN_LBA (0)
 #define MAX_LBA (99)
 #define VALUE_INPUT_LENGTH (10)
+#define MIN_COUNT (0)
+#define MAX_COUNT (10)
 
 #define READ_ARG_NUM (3)
 #define WRITE_ARG_NUM (4)
+#define ERASE_ARG_NUM (4)
 
 #define PARAM_CMD (1)
 #define PARAM_LBA (2)
@@ -155,11 +158,15 @@ bool SSD::IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT 
     valid = valid && CheckCMDandNumofParam(argc, argv, cmd);
     valid = valid && CheckLBA(argc, argv, lba);
 
-    if (argc == READ_ARG_NUM) {
+    if (*cmd == READ) {
         return valid;
     }
 
-    valid = valid && CheckValue(argc, argv, value);
+    if (*cmd == WRITE) {
+        valid = valid && CheckValue(argc, argv, value);
+    } else {    // ERASE
+        valid = valid && CheckCount(argc, argv, value);
+    }
 
     return valid;
 }
@@ -179,6 +186,11 @@ bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd)
             return false;
         }
         *cmd = WRITE;
+    } else if (strcmp(argv[PARAM_CMD], "E") == 0) {
+        if (argc != ERASE_ARG_NUM) {
+            return false;
+        }
+        *cmd = ERASE;
     } else {
         return false;
     }
@@ -214,6 +226,22 @@ bool SSD::CheckValue(int argc, char* argv[], OUT uint32_t* value)
     char* end;
     *value = (uint32_t)strtoul(argv[PARAM_VALUE], &end, 16);
     if (end != &argv[PARAM_VALUE][VALUE_INPUT_LENGTH]) {
+        return false;
+    }
+
+    return true;
+}
+
+bool SSD::CheckCount(int argc, char* argv[], OUT uint32_t* count)
+{
+    for (int i = 0; i < strlen(argv[PARAM_VALUE]); i++) {
+        if (argv[PARAM_VALUE][i] < '0' || argv[PARAM_VALUE][i] > '9') {
+            return false;
+        }
+    }
+
+    *count = atoi(argv[PARAM_VALUE]);
+    if (*count < MIN_COUNT || *count > MAX_COUNT) {
         return false;
     }
 
