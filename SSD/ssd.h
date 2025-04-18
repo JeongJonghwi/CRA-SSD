@@ -4,7 +4,6 @@
 #include <cstring>
 #include <stdint.h>
 #include <string>
-#include <iostream>
 
 #define OUT
 
@@ -13,7 +12,6 @@ using std::string;
 #define SSD_NAND_FILE_NAME "ssd_nand.txt"
 #define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
 #define SSD_ERROR_STRING "ERROR"
-#define SSD_COMMAND_FOLDER "Buffer"
 
 enum CmdType {
     READ,
@@ -27,24 +25,21 @@ public:
     SSD(const SSD& ssd) = delete;
     SSD& operator=(const SSD& ssd) = delete;
 
+    bool ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value);
+    bool WriteToOutputFileError();
     bool Read(uint32_t lba);
     bool Write(uint32_t lba, uint32_t value);
     bool Erase(uint32_t lba, uint32_t count);
-    bool ReadLbaFromSsd(uint32_t lba, uint32_t& readValue);
-    bool WriteToOutputFile(uint32_t readValue);
-    bool WriteToOutputFileError();
-    bool IsValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value);
 
 private:
+    void InitializeNandFile();
+
     bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd);
     bool CheckLBA(int argc, char* argv[], OUT uint32_t* lba);
     bool CheckValue(int argc, char* argv[], OUT uint32_t* value);
     bool CheckCount(int argc, char* argv[], OUT uint32_t* count);
 
-    void InitializeNandFile();
-    void InitalizeCommandBuffer();
-    bool IsDirectoryNotExists(const std::string& path);
-    bool CreateDirectoryIfNotExists(const std::string& path);
-    bool IsFileExists(const std::wstring& file);
-    void CreateEmptyFile(const char* fileName);
+    bool ReadLbaFromSsd(uint32_t lba, uint32_t& readValue);
+    bool WriteToOutputFile(uint32_t readValue);
+
 };
