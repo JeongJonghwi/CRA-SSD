@@ -2,21 +2,55 @@
 #include "interface.h"
 #include <windows.h>
 
+using std::to_string;
+
 class RealSSD : public SSD {
 public:
     RealSSD()
     {
-        exeDir = getExecutablePath();
+        exeFile = GetExecutablePath() + "/SSD.exe ";
     }
 
     string read(uint32_t address)
     {
-        std::string command = exeDir + "/SSD.exe R " + std::to_string(address);
+        RunCommand("R " + to_string(address));
+        return ReadFromOutputFile();
+    }
 
-        int result = system(command.c_str());
-        if (result)
-            return "ERROR";
+    void write(uint32_t address, string value)
+    {
+        RunCommand("W " + to_string(address) + " " + value);
+    }
 
+    void erase(uint32_t address, uint32_t size)
+    {
+        while (size > 10) {
+            RunCommand("E " + to_string(address) + " 10");
+            size -= 10;
+            address += 10;
+        }
+        RunCommand("E " + to_string(address) + " " + to_string(size));
+    }
+
+private:
+    string exeFile;
+
+    string GetExecutablePath()
+    {
+        char path[MAX_PATH];
+        GetModuleFileNameA(NULL, path, MAX_PATH);
+        string exePath(path);
+        return exePath.substr(0, exePath.find_last_of("\\/"));
+    }
+
+    void RunCommand(string command)
+    {
+        string fullCommand = exeFile + command;
+        system((exeFile + command).c_str());
+    }
+
+    const string& ReadFromOutputFile()
+    {
         FILE* file = nullptr;
         errno_t err = fopen_s(&file, "ssd_output.txt", "r");
 
@@ -24,7 +58,7 @@ public:
             return "0x00000000";
 
         char buffer[256];
-        std::string firstLine = "";
+        string firstLine = "";
 
         if (fgets(buffer, sizeof(buffer), file))
             firstLine = buffer;
@@ -32,39 +66,5 @@ public:
         fclose(file);
 
         return firstLine;
-    }
-
-    void write(uint32_t address, string value)
-    {
-        std::string command = exeDir + "/SSD.exe W " + std::to_string(address) + " " + value;
-        system(command.c_str());
-    }
-
-    void erase(uint32_t address, uint32_t size)
-    {
-        while (size > 10) {
-            std::string command = exeDir + "/SSD.exe E " + std::to_string(address) + " 10";
-            FILE* pipe = _popen(command.c_str(), "r");
-            if (pipe)
-                _pclose(pipe);
-
-            size -= 10;
-            address += 10;
-        }
-        std::string command = exeDir + "/SSD.exe E " + std::to_string(address) + " " + std::to_string(size);
-        FILE* pipe = _popen(command.c_str(), "r");
-        if (pipe)
-            _pclose(pipe);
-    }
-
-private:
-    std::string exeDir;
-
-    std::string getExecutablePath()
-    {
-        char path[MAX_PATH];
-        GetModuleFileNameA(NULL, path, MAX_PATH);
-        std::string exePath(path);
-        return exePath.substr(0, exePath.find_last_of("\\/"));
     }
 };
