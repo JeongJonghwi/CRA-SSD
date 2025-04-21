@@ -120,6 +120,36 @@ TEST_F(ShellTestFixture, writeFailWithInvalidValue)
     EXPECT_EQ(expected, actual);
 }
 
+TEST_F(ShellTestFixture, eraseSuccess)
+{
+    EXPECT_CALL(ssd, erase(VALID_ADDRESS, 1))
+        .Times(1);
+
+    string expected = "Done";
+    string actual = ts.erase(VALID_ADDRESS, 1);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(ShellTestFixture, eraseFailWithInvalidSize)
+{
+    EXPECT_CALL(ssd, erase(VALID_ADDRESS, -2))
+        .Times(0);
+
+    string expected = "ERROR";
+    string actual = ts.erase(VALID_ADDRESS, -2);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(ShellTestFixture, eraseFailWithInvalidLBA)
+{
+    EXPECT_CALL(ssd, erase(INVALID_ADDRESS, 1))
+        .Times(0);
+
+    string expected = "ERROR";
+    string actual = ts.erase(INVALID_ADDRESS, 1);
+    EXPECT_EQ(expected, actual);
+}
+
 TEST_F(ShellTestFixture, helpTest)
 {
     string expected = "Team CodeCraft: ";
@@ -253,18 +283,44 @@ TEST_F(InvalidCMDTestFixture, fullWriteFailWithInvalidValue)
     validNotOkay("fullwrite " + INVALID_VALUE);
 }
 
-TEST_F(SSDFixture, readWithRealSSDNoOutput)
-{
-    string expected = "0x00000000";
-    string actual = ts.read(VALID_ADDRESS);
 
-    EXPECT_EQ(expected, actual);
-}
-
-TEST_F(SSDFixture, writeWithRealSSD)
+TEST_F(SSDFixture, writeAndReadWithRealSSD)
 {
     string expected = "Done";
     string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
 
     EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ts.read(VALID_ADDRESS), VALID_VALUE);
+}
+
+TEST_F(SSDFixture, writeFailAndReadWithRealSSD)
+{
+    ts.write(VALID_ADDRESS, VALID_VALUE);
+
+    string expected = "ERROR";
+    string actual = ts.write(VALID_ADDRESS, INVALID_VALUE);
+
+    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ts.read(VALID_ADDRESS), VALID_VALUE);
+}
+
+TEST_F(SSDFixture, eraseAndReadWithRealSSD)
+{
+    string expected = "Done";
+    string actual = ts.erase(VALID_ADDRESS, 1);
+
+    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ts.read(VALID_ADDRESS), "0x00000000");
+}
+
+
+TEST_F(SSDFixture, eraseFailAndReadWithRealSSD)
+{
+    ts.write(VALID_ADDRESS, VALID_VALUE);
+
+    string expected = "ERROR";
+    string actual = ts.erase(VALID_ADDRESS, -2);
+
+    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(ts.read(VALID_ADDRESS), VALID_VALUE);
 }
