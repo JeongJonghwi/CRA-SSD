@@ -45,12 +45,12 @@ class ShellTestScriptFixture : public TestFixture {
         HMODULE hDll = LoadLibraryA("TestScript.dll");
 
         if (!hDll) {
-            std::cerr << "Failed to load DLL!" << std::endl;
+            return "Failed to load DLL!";
         }
 
         CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, ("CreateScript_" +scriptName).c_str());
         if (!createScript) {
-            std::cerr << "Failed to get CreateScript function!" << std::endl;
+            return "Failed to get CreateScript function!";
         }
 
         ITestScript* script = createScript(&ssd);

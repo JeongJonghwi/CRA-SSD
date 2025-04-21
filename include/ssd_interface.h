@@ -3,9 +3,7 @@
 
 using std::string;
 
-#define interface struct
-
-interface SSD
+class SSD
 {
 public:
     virtual string read(uint32_t address) = 0;

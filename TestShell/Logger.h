@@ -12,7 +12,7 @@ public:
     void Print(const string& logingFunctionStr, const string& loggingMessage);
 
 private:
-    string GetCurrentTime(const char* format) const;
+    string GetCurTime(const char* format) const;
     bool OpenLastLogFile();
     bool isOverLogFileSize();
     void WriteLog(const string& log);
