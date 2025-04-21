@@ -1,9 +1,8 @@
 #include "ssd_interface.h"
 #include "test_script_interface.h"
 #include "real_ssd.h"
-#include "shell.cpp"
+#include "shell.h"
 #include "gmock/gmock.h"
-#include <string>
 
 using namespace testing;
 using std::string;

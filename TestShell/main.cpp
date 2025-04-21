@@ -1,5 +1,5 @@
 #include "real_ssd.h"
-#include "shell.cpp"
+#include "shell.h"
 #include "testscript_runner.h"
 #include "Logger.h"
 
