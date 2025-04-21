@@ -189,9 +189,12 @@ list<Command>::iterator CommandBufferManager::Delete(list<Command>::iterator ite
     }
 
     list<Command>::iterator it = iter;
-    for (it--; it != commands.begin(); it--) {
+    for (it--; ; it--) {
         Rename(it, it->order-1, it->type, it->lba, it->value);
         it->order--;
+        if (it == commands.begin()) {
+            break;
+        }
     }
 
     return iter;
@@ -270,6 +273,9 @@ void CommandBufferManager::MergeErase()
                 next->lba = new_start;
                 next->value = new_size;
                 iter = next;
+                if (iter != commands.begin()) {
+                    iter--;
+                }
                 continue;
             }
         }
