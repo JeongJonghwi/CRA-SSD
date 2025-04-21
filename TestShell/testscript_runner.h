@@ -4,7 +4,7 @@
 #include <string>
 #include <random>
 
-#include "testscript.cpp"
+#include "ssd_interface.h"
 
 using std::string;
 using std::vector;

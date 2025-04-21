@@ -25,7 +25,6 @@ int main(void)
 {
     RealSSD ssd;
     TestShell test_shell(&ssd);
-    TestScript script(&ssd);
 
     while (1) {
         string input;

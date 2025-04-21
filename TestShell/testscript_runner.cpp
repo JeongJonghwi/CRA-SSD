@@ -2,6 +2,8 @@
 #include "test_script_interface.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 typedef ITestScript* (*CreateScriptFunc)(SSD*);
 

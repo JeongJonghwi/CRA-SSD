@@ -42,9 +42,6 @@
     <ClCompile Include="testscript_runner.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="testscript.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
