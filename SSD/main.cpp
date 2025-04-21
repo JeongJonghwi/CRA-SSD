@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 #if (TEST == 0)
     SSD ssd;
     CmdType cmd;
-    CommandBufferManager buffermanager;
+    CommandBufferManager buffermanager { &ssd };
     uint32_t lba, value;
 
     if (ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
     }
     case WRITE:
     {
-        // ssd.Write(lba, value);
         buffermanager.AddWrite(lba, value);
         break;
     }
@@ -54,24 +53,10 @@ int main(int argc, char* argv[])
         if (value == 0) {
             break;
         }
-        // ssd.Erase(lba, value);
         buffermanager.AddErase(lba, value);
         break;
     }
     case FLUSH: {
-        list<Command> buf = buffermanager.getBufferList();
-        for (Command cmd = buf.back(); buf.size() > 0; buf.pop_back()) {
-            switch (cmd.type) {
-            case WRITE:
-                ssd.Write(cmd.lba, cmd.value);
-                break;
-            case ERASE:
-                ssd.Erase(cmd.lba, cmd.value);
-                break;
-            default:
-                break;
-            }
-        }
         buffermanager.Flush();
     }
     }
