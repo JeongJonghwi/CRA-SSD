@@ -255,7 +255,7 @@ void CommandBufferManager::MergeErase()
             uint32_t end1 = iter->GetEnd();
             uint32_t end2 = next->GetEnd();
 
-            if (end1 < start2 - 1 || end2 < start1 - 1) {
+            if (end1 >= start2 - 1 && end2 >= start1 - 1) {
                 uint32_t new_start = min(start1, start2);
                 uint32_t new_end = max(end1, end2);
                 uint32_t new_size = new_end - new_start + 1;
