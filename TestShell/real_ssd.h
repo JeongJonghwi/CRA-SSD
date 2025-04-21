@@ -32,6 +32,11 @@ public:
         RunCommand("E " + to_string(address) + " " + to_string(size));
     }
 
+    void flush()
+    {
+        RunCommand("F");
+    }
+
 private:
     string exeFile;
 

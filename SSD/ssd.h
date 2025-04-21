@@ -20,11 +20,12 @@ enum CmdType {
     READ = CMD_START,
     WRITE,
     ERASE,
+    FLUSH,
     CMD_COUNT,
     INVALID_CMD = 0xFF
 };
 
-const string cmd_symbol[CMD_COUNT] = { "R", "W", "E" };
+const string cmd_symbol[CMD_COUNT] = { "R", "W", "E", "F" };
 
 class SSD {
 public:

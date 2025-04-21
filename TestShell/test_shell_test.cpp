@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(string, read, (uint32_t address), (override));
     MOCK_METHOD(void, write, (uint32_t address, string value), (override));
     MOCK_METHOD(void, erase, (uint32_t address, uint32_t size), (override));
+    MOCK_METHOD(void, flush, (), (override));
 };
 
 class TestFixture : public Test {
