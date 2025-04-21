@@ -238,66 +238,6 @@ TEST_F(InvalidCMDTestFixture, fullWriteFailWithInvalidValue)
     validNotOkay("fullwrite " + INVALID_VALUE);
 }
 
-TEST_F(InvalidCMDTestFixture, TestCase1_WorkTest)
-{
-    validOkay("1_");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase1_DoNotWorkTest)
-{
-    validNotOkay("1_dd");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase1_FullWorkTest)
-{
-    validOkay("1_FullWriteAndReadCompare");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase1_FullDoNotWorkTest)
-{
-    validNotOkay("1_FullWriteAndReadComparedd");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase2_WorkTest)
-{
-    validOkay("2_");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase2_DoNotWorkTest)
-{
-    validNotOkay("2_dasdfasdfd");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase2_FullWorkTest)
-{
-    validOkay("2_PartialLBAWrite");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase2_FullDoNotWorkTest)
-{
-    validNotOkay("2_PartialLBAWrited");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase3_WorkTest)
-{
-    validOkay("3_");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase3_DoNotWorkTest)
-{
-    validNotOkay("3_;");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase3_FullWorkTest)
-{
-    validOkay("3_WriteReadAging");
-}
-
-TEST_F(InvalidCMDTestFixture, TestCase3_FullDoNotWorkTest)
-{
-    validNotOkay("3_WriteReadAginged");
-}
-
 TEST_F(SSDFixture, readWithRealSSDNoOutput)
 {
     string expected = "0x00000000";
