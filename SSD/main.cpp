@@ -1,13 +1,13 @@
 #include "ssd.h"
 #include "command_buffer_manager.h"
 
-#define TEST (1)
+#define TEST (0)
 #if TEST
 #include <iostream>
 #include <cstring>
 #endif
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 #include "gmock/gmock.h"
 
 int main(void)
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     }
     SSD ssd;
     CmdType cmd;
-    CommandBufferManager buffermanager;
+    CommandBufferManager buffermanager { &ssd };
     uint32_t lba, value;
 
     if (ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
