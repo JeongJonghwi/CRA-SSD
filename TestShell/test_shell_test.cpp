@@ -101,8 +101,8 @@ TEST_F(ShellTestFixture, helpTest)
     expected += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
     expected += "write: write {value} to {address}\n";
     expected += "read: read from {address}\n";
-    expected += "fullwrite: write {value} to 0x0 ~ 0x100\n";
-    expected += "fullread: read from all 0x0 ~ 0x100\n";
+    expected += "fullwrite: write {value} to 0 ~ 99\n";
+    expected += "fullread: read from all 0 ~ 99\n";
     expected += "help: print this message\n";
     expected += "exit: exit TestShell\n";
 
