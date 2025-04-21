@@ -2,7 +2,6 @@
 #include "test_script_interface.h"
 #include "real_ssd.h"
 #include "shell.cpp"
-#include "testscript.cpp"
 #include "gmock/gmock.h"
 #include <string>
 
