@@ -17,11 +17,11 @@ public:
     }
     bool isTestFile(string);
     void txtFileTestRun(string);
-    bool testRun(string);
+    string testRun(string);
+    bool isTestScript(string);
 
 private:
     vector<string> readFileLines(const string&);
-    bool isTestScript(string);
     string randomValue();
     SSD *ssd;
 };
