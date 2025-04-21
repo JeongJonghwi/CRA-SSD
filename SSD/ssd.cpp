@@ -9,6 +9,7 @@
 #define READ_ARG_NUM (3)
 #define WRITE_ARG_NUM (4)
 #define ERASE_ARG_NUM (4)
+#define FLUSH_ARG_NUM (2)
 
 #define PARAM_CMD (1)
 #define PARAM_LBA (2)
@@ -39,6 +40,11 @@ bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT ui
     bool valid = true;
 
     valid = valid && CheckCMDandNumofParam(argc, argv, cmd);
+
+    if (*cmd == FLUSH) {
+        return valid;
+    }
+
     valid = valid && CheckLBA(argc, argv, lba);
 
     if (*cmd == READ) {
@@ -197,6 +203,10 @@ bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd)
         }
     } else if (*cmd == ERASE) {
         if (argc != ERASE_ARG_NUM) {
+            return false;
+        }
+    } else if (*cmd == FLUSH) {
+        if (argc != FLUSH_ARG_NUM) {
             return false;
         }
     } else {

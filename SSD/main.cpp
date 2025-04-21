@@ -58,6 +58,22 @@ int main(int argc, char* argv[])
         buffermanager.AddErase(lba, value);
         break;
     }
+    case FLUSH: {
+        list<Command> buf = buffermanager.getBufferList();
+        for (Command cmd = buf.back(); buf.size() > 0; buf.pop_back()) {
+            switch (cmd.type) {
+            case WRITE:
+                ssd.Write(cmd.lba, cmd.value);
+                break;
+            case ERASE:
+                ssd.Erase(cmd.lba, cmd.value);
+                break;
+            default:
+                break;
+            }
+        }
+        buffermanager.Flush();
+    }
     }
 #else
     argc = 1;

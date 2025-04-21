@@ -57,15 +57,13 @@ void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
 
 void CommandBufferManager::AddErase(uint32_t lba, uint32_t value)
 {
-    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();)
-    {
+    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();) {
         if (iter->type == WRITE) {
             if ((iter->lba >= lba) && (iter->lba < lba + value)) {
                 iter = Delete(iter);
                 continue;
             }
-        }
-        else {  // if (iter->type == ERASE)
+        } else { // if (iter->type == ERASE)
             if ((iter->lba >= lba) && (iter->GetEnd() <= lba + value - 1)) {
                 iter = Delete(iter);
                 continue;
@@ -77,6 +75,18 @@ void CommandBufferManager::AddErase(uint32_t lba, uint32_t value)
     AddCommand(ERASE, lba, value);
 
     MergeErase();
+}
+
+bool CommandBufferManager::Flush() {
+    // commands list 초기화
+
+    // file을 empty로 변경
+    return true;
+}
+
+list<Command> CommandBufferManager::getBufferList()
+{
+    return commands;
 }
 
 bool CommandBufferManager::CheckDirectoryExists(const string& path)

@@ -36,6 +36,9 @@ public:
     bool FastRead(uint32_t lba, uint32_t& readValue);
     void AddWrite(uint32_t lba, uint32_t value);
     void AddErase(uint32_t lba, uint32_t value);
+    bool Flush();
+    list<Command> getBufferList();
+
 private:
     uint32_t valid_count;
     list<Command> commands;
