@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ssd_interface.h"
 #include "test_script_interface.h"
+#include "Logger.h"
 
 #include <iostream>
 #include <vector>
@@ -12,7 +13,7 @@ public:
     {
     }
 
-    string Run() override
+    string Run(Logger* logger) override
     {
         string value = "0x12345678";
 
@@ -23,12 +24,15 @@ public:
 
         for (int i = 0; i < 30; i++) {
             for (auto o : order) {
+                logger->Print("2_PartialLBAWrite.write()", "write value " + value + " at " + std::to_string(o));
                 ssd->write(o, value);
             }
 
             for (auto o : order) {
-                if (didReadFail(ssd->read(o), value))
+                if (didReadFail(ssd->read(o), value)) {
+                    logger->Print("2_PartialLBAWrite.readCompare()", "fail - expected " + value + " but wrong value at " + std::to_string(o));
                     return "FAIL";
+                }
             }
         }
         return "PASS";

@@ -3,11 +3,12 @@
 #include <iostream>
 
 class SSD;
+class Logger;
 
 class ITestScript {
 public:
     virtual ~ITestScript() { }
-    virtual std::string Run() = 0;
+    virtual std::string Run(Logger* logger) = 0;
 
 protected:
     const int SSD_MINIMUM_ADDRESS = 0;

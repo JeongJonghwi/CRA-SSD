@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ssd_interface.h"
 #include "test_script_interface.h"
+#include "Logger.h"
 
 #include <iostream>
 #include <vector>
@@ -12,23 +13,34 @@ public:
     {
     }
 
-    string Run() override
+    string Run(Logger* logger) override
     {
+        logger->Print("4_EraseAndWriteAging.erase()", "erase value from 0 to 3");
         ssd->erase(0, 3);
         for (int i = 0; i < 30; i++) {
             for (int startAddr = 2; startAddr <= 96; startAddr += 2) {
+
+                logger->Print("4_EraseAndWriteAging.write()", "write value at " + std::to_string(startAddr));
                 ssd->write(startAddr, "0x12345678");
                 ssd->write(startAddr, "0x87654321");
+
+                logger->Print("4_EraseAndWriteAging.erase()", "erase value from " + std::to_string(startAddr) + " to " + std::to_string(startAddr+2));
                 ssd->erase(startAddr, 3);
 
-                if (didReadFail(ssd->read(startAddr), "0x00000000"))
+                if (didReadFail(ssd->read(startAddr), "0x00000000")) {
+                    logger->Print("4_EraseAndWriteAging.erase()", "value is not erased at " + std::to_string(startAddr));
                     return "FAIL";
+                }
 
-                if (didReadFail(ssd->read(startAddr + 1), "0x00000000"))
+                if (didReadFail(ssd->read(startAddr + 1), "0x00000000")) {
+                    logger->Print("4_EraseAndWriteAging.erase()", "value is not erased at " + std::to_string(startAddr+1));
                     return "FAIL";
+                }
 
-                if (didReadFail(ssd->read(startAddr + 2), "0x00000000"))
+                if (didReadFail(ssd->read(startAddr + 2), "0x00000000")) {
+                    logger->Print("4_EraseAndWriteAging.erase()", "value is not erased at " + std::to_string(startAddr+2));
                     return "FAIL";
+                }
             }
         }
 

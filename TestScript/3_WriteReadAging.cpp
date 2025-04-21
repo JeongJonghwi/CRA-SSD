@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ssd_interface.h"
 #include "test_script_interface.h"
+#include "Logger.h"
 
 #include <iomanip>
 #include <iostream>
@@ -14,14 +15,18 @@ public:
     {
     }
 
-    string Run() override
+    string Run(Logger* logger) override
     {
         for (int i = 0; i < 200; i++) {
             string value = randomValue();
+            logger->Print("3_WriteReadAging.write()", "write value " + value + " at 0");
             ssd->write(0, value);
+            logger->Print("3_WriteReadAging.write()", "write value " + value + " at 99");
             ssd->write(99, value);
-            if (didReadFail(ssd->read(0), ssd->read(99)))
+            if (didReadFail(ssd->read(0), ssd->read(99))) {
+                logger->Print("3_WriteReadAging.readCompare()", "fail - values mismatch");
                 return "FAIL";
+            }
         }
         return "PASS";
     }

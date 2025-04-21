@@ -52,7 +52,7 @@ public:
         }
 
         ITestScript* script = createScript(&ssd);
-        string actual = script->Run();
+        string actual = script->Run(nullptr);
         delete script;
         FreeLibrary(hDll);
         return actual;
