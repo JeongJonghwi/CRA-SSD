@@ -28,11 +28,13 @@ string TestShell::help()
     ret += "fullread: read from all 0 ~ 99\n";
     ret += "help: print this message\n";
     ret += "exit: exit TestShell\n";
+    logger.Print("TestShell.help()", ret);
     return ret;
 }
 
 string TestShell::exit()
 {
+    logger.Print("TestShell.exit()", "Shell Closed");
     return "Exit TestShell";
 }
 
@@ -40,19 +42,23 @@ string TestShell::fullWrite(string value)
 {
     if (!isValidValue(value))
         return "ERROR";
+    logger.Print("TestShell.fullWrite()", "fullwrite start");
     for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
         ssd->write(i, value);
     }
+    logger.Print("TestShell.fullWrite()", "fullwrite End");
     return "Done";
 }
 
 string TestShell::fullRead()
 {
     string ret = "";
+    logger.Print("TestShell.fullRead()", "fullRead start");
     for (int i = SSD_MINIMUM_ADDRESS; i < SSD_MAXIMUM_ADDRESS; i++) {
         ret += ssd->read(i);
         ret += "\n";
     }
+    logger.Print("TestShell.fullRead()", "fullRead End");
     return ret;
 }
 
@@ -62,6 +68,7 @@ string TestShell::erase(int address, int size)
         return "ERROR";
     if (size < 0)
         return "ERROR";
+    logger.Print("TestShell.erase()", "erase start - address " + std::to_string(address) + " size " + std::to_string(size));
     ssd->erase(address, size);
 
     return "Done";

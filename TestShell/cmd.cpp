@@ -100,6 +100,7 @@ void CMD::setValidEraseSize(int s)
 
     address = startLba;
     size = endLba - startLba + 1;
+    logger.Print("CMD.setValidEraseSize()", "address : " + std::to_string(address) + " size : " + std::to_string(size));
 }
 
 void CMD::setValidEraseRangeSize(int startLba, int endLba)
@@ -110,14 +111,19 @@ void CMD::setValidEraseRangeSize(int startLba, int endLba)
         startLba = address;
     }
     size = endLba - startLba + 1;
+    logger.Print("CMD.setValidEraseRangeSize()", "address : " + std::to_string(address) + " size : " + std::to_string(size));
 }
 
 bool CMD::isValidLBA(string lba)
 {
-    if (!isNumber(lba))
+    if (!isNumber(lba)) {
+        logger.Print("CMD.isValidLBA()", "LBA is not Number : " + lba);
         return false;
-    if (!isValidAddress(stoi(lba)))
+    }
+    if (!isValidAddress(stoi(lba))) {
+        logger.Print("CMD.isValidLBA()", "LBA is not in range : " + lba);
         return false;
+    }
     return true;
 }
 
@@ -130,12 +136,15 @@ bool CMD::isValidAddress(uint32_t address)
 
 bool CMD::isValidValue(string value)
 {
-    if (value.length() != 10 || value[0] != '0' || value[1] != 'x')
+    if (value.length() != 10 || value[0] != '0' || value[1] != 'x') {
+        logger.Print("CMD.isValidValue()", "Value is not valid length & format : " + value);
         return false;
+    }
 
     for (int i = 2; i < 10; i++) {
         if ((value[i] >= '0' && value[i] <= '9') || (value[i] >= 'A' && value[i] <= 'F') || (value[i] >= 'a' && value[i] <= 'f'))
             continue;
+        logger.Print("CMD.isValidValue()", "Value is not HEX : " + value);
         return false;
     }
     return true;

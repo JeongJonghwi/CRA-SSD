@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Logger.h"
 
 using std::string;
 using std::vector;
@@ -38,6 +39,7 @@ private:
     int address;
     string data;
     int size;
+    Logger& logger = Logger::getInstance();
 
     int lbaLimitRange(int i);
     void setValidEraseSize(int s);

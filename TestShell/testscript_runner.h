@@ -5,6 +5,7 @@
 #include <random>
 
 #include "ssd_interface.h"
+#include "Logger.h"
 
 using std::string;
 using std::vector;
@@ -21,6 +22,7 @@ public:
     bool isTestScript(string);
 
 private:
+    Logger& logger = Logger::getInstance();
     vector<string> readFileLines(const string&);
     string randomValue();
     SSD *ssd;
