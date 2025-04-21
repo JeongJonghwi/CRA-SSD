@@ -7,8 +7,9 @@
 using std::min;
 using std::max;
 
-CommandBufferManager::CommandBufferManager()
+CommandBufferManager::CommandBufferManager(SSD* ssd)
 {
+    this->ssd = ssd;
     if (CheckDirectoryExists(BUFFER_DIRECTORY_NAME)) {
         CreateFolder();
         valid_count = 0;
@@ -41,6 +42,10 @@ bool CommandBufferManager::FastRead(uint32_t lba, uint32_t& readValue)
 
 void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
 {
+    if (commands.size() >= MAX_FILES) {
+        Flush();
+    }
+
     for (list<Command>::iterator iter = commands.begin(); iter != commands.end();)
     {
         if (iter->lba == lba) {
@@ -57,6 +62,10 @@ void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
 
 void CommandBufferManager::AddErase(uint32_t lba, uint32_t value)
 {
+    if (commands.size() >= MAX_FILES) {
+        Flush();
+    }
+
     for (list<Command>::iterator iter = commands.begin(); iter != commands.end();) {
         if (iter->type == WRITE) {
             if ((iter->lba >= lba) && (iter->lba < lba + value)) {
@@ -78,15 +87,22 @@ void CommandBufferManager::AddErase(uint32_t lba, uint32_t value)
 }
 
 bool CommandBufferManager::Flush() {
-    // commands list 초기화
+    for (list<Command>::reverse_iterator iter = commands.rbegin(); iter != commands.rend(); iter++) {
+        switch (iter->type) {
+        case WRITE:
+            ssd->Write(iter->lba, iter->value);
+            break;
+        case ERASE:
+            ssd->Erase(iter->lba, iter->value);
+            break;
+        default:
+            break;
+        }
+        Invalidate(*iter);
+    }
+    commands.clear();
 
-    // file을 empty로 변경
     return true;
-}
-
-list<Command> CommandBufferManager::getBufferList()
-{
-    return commands;
 }
 
 bool CommandBufferManager::CheckDirectoryExists(const string& path)
@@ -165,7 +181,7 @@ void CommandBufferManager::ScanFiles()
 
 list<Command>::iterator CommandBufferManager::Delete(list<Command>::iterator iter)
 {
-    Invalidate(iter);
+    Invalidate(*iter);
     iter = commands.erase(iter);
 
     if (iter == commands.begin() || commands.size() == 0) {
@@ -208,9 +224,9 @@ void CommandBufferManager::Rename(list<Command>::iterator iter, int32_t order, C
     rename(old.c_str(), changed.c_str());
 }
 
-void CommandBufferManager::Invalidate(list<Command>::iterator iter)
+void CommandBufferManager::Invalidate(Command& command)
 {
-    string old = GetFileName(*iter);
+    string old = GetFileName(command);
     string changed = string(BUFFER_DIRECTORY_NAME) + "\\" + to_string(valid_count--) + "_empty";
     rename(old.c_str(), changed.c_str());
 }

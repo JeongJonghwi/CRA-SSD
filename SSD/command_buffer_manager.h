@@ -32,14 +32,14 @@ struct Command {
 
 class CommandBufferManager {
 public:
-    CommandBufferManager();
+    CommandBufferManager(SSD* ssd);
     bool FastRead(uint32_t lba, uint32_t& readValue);
     void AddWrite(uint32_t lba, uint32_t value);
     void AddErase(uint32_t lba, uint32_t value);
     bool Flush();
-    list<Command> getBufferList();
 
 private:
+    SSD* ssd;
     uint32_t valid_count;
     list<Command> commands;
 
@@ -52,7 +52,7 @@ private:
     string GetFileName(Command &command);
     string GetFileName(uint32_t order, CmdType type, uint32_t lba, uint32_t value);
     void Rename(list<Command>::iterator iter, int32_t order, CmdType type, uint32_t lba, uint32_t value);
-    void Invalidate(list<Command>::iterator iter);
+    void Invalidate(Command& command);
     void AddCommand(CmdType type, uint32_t lba, uint32_t value);
     void MergeErase();
 };
