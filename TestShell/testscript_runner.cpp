@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include "Logger.h"
 
 typedef ITestScript* (*CreateScriptFunc)(SSD*);
 
@@ -60,9 +61,10 @@ string TestScriptRunner::testRun(string command)
     }
 
     ITestScript* script = createScript(ssd);
-    logger.Print("TestScriptRunner.testRun()", "Test " + command + " Start!");
-    string result = script->Run();
-    logger.Print("TestScriptRunner.testRun()", "Test " + command + " End! result = " + result);
+
+	logger.Print("TestScriptRunner.testRun()", "Test " + command + " Start!");
+    string result = script->Run(&logger);
+	logger.Print("TestScriptRunner.testRun()", "Test " + command + " End! result = " + result);
     delete script;
     FreeLibrary(hDll);
 
