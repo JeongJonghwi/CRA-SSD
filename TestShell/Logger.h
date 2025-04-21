@@ -18,7 +18,7 @@ private:
     void WriteLog(const string& log);
     void RenameLogFile(const string& oldLogFileName, const string& newLogFileName);
     bool BackupLogFile();
-    std::tm* GetCurrentTimeStruct() const;
+    std::tm GetCurrentTimeStruct() const;
     void FindFilesWithExtension(const string& folderPath, const string& extension);
 
     FILE* loggerFilePointer;
