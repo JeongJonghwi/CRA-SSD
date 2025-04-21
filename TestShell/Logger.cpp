@@ -38,6 +38,7 @@ void Logger::CloseLogger()
     if (loggerFilePointer != nullptr) {
         fflush(loggerFilePointer);
         fclose(loggerFilePointer);
+        loggerFilePointer = nullptr;
     }
 }
 
