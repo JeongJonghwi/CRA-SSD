@@ -144,6 +144,7 @@
     <ClCompile Include="test_shell_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cmd.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="real_ssd.h" />
     <ClInclude Include="shell.h" />

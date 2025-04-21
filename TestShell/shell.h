@@ -1,5 +1,5 @@
 #pragma once
-#include "cmd.cpp"
+#include "cmd.h"
 #include "ssd_interface.h"
 #include "gmock/gmock.h"
 #include <string>
