@@ -23,6 +23,7 @@ void TestScriptRunner::txtFileTestRun(string filename)
     for (auto cmd : cmds) {
         if (!isTestScript(cmd)) {
             std::cout << "INVALID COMMAND\n";
+            logger.Print("TestScriptRunner.txtFileTestRun()", "CMD is Not in TestScript : " + cmd);
             continue;
         }
         std::cout << cmd << "\t___\tRun...";
@@ -48,17 +49,20 @@ string TestScriptRunner::testRun(string command)
     HMODULE hDll = LoadLibraryA("TestScript.dll");
 
     if (!hDll) {
-        std::cerr << "Failed to load DLL!" << std::endl;
+        logger.Print("TestScriptRunner.testRun()", "Failed to load DLL!");
     }
 
     string scriptName = "CreateScript_" + command;
     CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
     if (!createScript) {
+        logger.Print("TestScriptRunner.testRun()", "CMD is Not in TestScript");
         return "FAIL";
     }
 
     ITestScript* script = createScript(ssd);
+    logger.Print("TestScriptRunner.testRun()", "Test " + command + " Start!");
     string result = script->Run();
+    logger.Print("TestScriptRunner.testRun()", "Test " + command + " End! result = " + result);
     delete script;
     FreeLibrary(hDll);
 
@@ -70,7 +74,7 @@ bool TestScriptRunner::isTestScript(string command)
     HMODULE hDll = LoadLibraryA("TestScript.dll");
 
     if (!hDll) {
-        std::cerr << "Failed to load DLL!" << std::endl;
+        logger.Print("TestScriptRunner.isTestScript()", "Failed to load DLL!");
     }
 
     string scriptName = "CreateScript_" + command;
@@ -87,7 +91,7 @@ vector<string> TestScriptRunner::readFileLines(const string& filename)
     FILE* file = nullptr;
 
     if (fopen_s(&file, filename.c_str(), "r") != 0 || file == nullptr) {
-        std::cout << "파일 열기 실패: " << filename << std::endl;
+        logger.Print("TestScriptRunner.readFileLines()", "Failed to Open File");
         return lines;
     }
 
@@ -103,6 +107,7 @@ vector<string> TestScriptRunner::readFileLines(const string& filename)
                 line.pop_back();
             }
         }
+        logger.Print("TestScriptRunner.readFileLines()", "Loaded Test Script : " + line);
         lines.push_back(line);
     }
 
