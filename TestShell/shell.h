@@ -5,12 +5,15 @@
 #include <string>
 #include <vector>
 
+#include "Logger.h"
+
 class TestShell {
 public:
     TestShell(SSD* ssd)
         : ssd(ssd)
     {
     }
+    virtual ~TestShell() { logger.CloseLogger(); }
     string read(uint32_t address);
     string write(uint32_t address, string value);
     string help();
@@ -22,6 +25,7 @@ public:
 
 private:
     SSD* ssd;
+    Logger& logger = Logger::getInstance();
     const int SSD_MINIMUM_ADDRESS = 0;
     const int SSD_MAXIMUM_ADDRESS = 100;
 
