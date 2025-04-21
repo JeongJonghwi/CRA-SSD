@@ -35,8 +35,8 @@ public:
         ret += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
         ret += "write: write {value} to {address}\n";
         ret += "read: read from {address}\n";
-        ret += "fullwrite: write {value} to 0x0 ~ 0x100\n";
-        ret += "fullread: read from all 0x0 ~ 0x100\n";
+        ret += "fullwrite: write {value} to 0 ~ 99\n";
+        ret += "fullread: read from all 0 ~ 99\n";
         ret += "help: print this message\n";
         ret += "exit: exit TestShell\n";
         return ret;
