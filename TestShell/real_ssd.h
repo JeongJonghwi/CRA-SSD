@@ -1,6 +1,7 @@
 #pragma once
 #include "ssd_interface.h"
 #include <windows.h>
+#include <iostream>
 
 using std::to_string;
 
@@ -8,7 +9,7 @@ class RealSSD : public SSD {
 public:
     RealSSD()
     {
-        exeFile = GetExecutablePath() + "/SSD.exe ";
+        exeFile = GetExecutablePath() + "\\..\\Release\\SSD.exe ";
     }
 
     string read(uint32_t address)
@@ -52,7 +53,8 @@ private:
     string ReadFromOutputFile()
     {
         FILE* file = nullptr;
-        errno_t err = fopen_s(&file, "ssd_output.txt", "r");
+        string txtPath = GetExecutablePath() + "/ssd_output.txt";
+        errno_t err = fopen_s(&file, txtPath.c_str(), "r");
 
         if (err != 0 || file == nullptr)
             return "0x00000000";
