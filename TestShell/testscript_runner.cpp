@@ -24,7 +24,7 @@ void TestScriptRunner::txtFileTestRun(string filename)
             continue;
         }
         std::cout << cmd << "\t___\tRun...";
-        if (!testRun(cmd)) {
+        if (testRun(cmd) != "PASS") {
             std::cout << "Fail!\n";
             break;
         }
@@ -41,7 +41,7 @@ string TestScriptRunner::randomValue()
     return hexStr;
 }
 
-bool TestScriptRunner::testRun(string command)
+string TestScriptRunner::testRun(string command)
 {
     HMODULE hDll = LoadLibraryA("TestScript.dll");
 
@@ -52,7 +52,7 @@ bool TestScriptRunner::testRun(string command)
     string scriptName = "CreateScript_" + command;
     CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
     if (!createScript) {
-        std::cerr << "Failed to get CreateScript function!" << std::endl;
+        return "FAIL";
     }
 
     ITestScript* script = createScript(ssd);
@@ -60,25 +60,23 @@ bool TestScriptRunner::testRun(string command)
     delete script;
     FreeLibrary(hDll);
 
-    std::cout << result << std::endl;
-
-    if (result == "PASS")
-        return true;
-    return false;
+    return result;
 }
 
-bool TestScriptRunner::isTestScript(string s)
+bool TestScriptRunner::isTestScript(string command)
 {
-    if (s == "1_" || s == "2_" || s == "3_" || s == "4")
-        return true;
+    HMODULE hDll = LoadLibraryA("TestScript.dll");
 
-    if (s == "1_FullWriteAndReadCompare"
-        || s == "2_PartialLBAWrite"
-        || s == "3_WriteReadAging"
-        || s == "4_EraseAndWriteAging")
-        return true;
+    if (!hDll) {
+        std::cerr << "Failed to load DLL!" << std::endl;
+    }
 
-    return false;
+    string scriptName = "CreateScript_" + command;
+    CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
+    if (!createScript) {
+        return false;
+    }
+    return true;
 }
 
 vector<string> TestScriptRunner::readFileLines(const string& filename)

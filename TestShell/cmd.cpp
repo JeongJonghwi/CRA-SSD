@@ -70,10 +70,6 @@ public:
 
         if (input == "help" || input == "exit" || input == "fullread" || input == "flush")
             return true;
-
-        if (isTestScript(input))
-            return true;
-
         return false;
     }
 
@@ -192,18 +188,5 @@ private:
                 return false;
         }
         return true;
-    }
-
-    bool isTestScript(string s)
-    {
-        if (s == "1_" || s == "2_" || s == "3_")
-            return true;
-
-        if (s == "1_FullWriteAndReadCompare"
-            || s == "2_PartialLBAWrite"
-            || s == "3_WriteReadAging")
-            return true;
-
-        return false;
     }
 };

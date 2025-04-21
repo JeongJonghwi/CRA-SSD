@@ -60,10 +60,12 @@ public:
     string eraseAndWriteAging()
     {
         ssd->erase(0, 3);
+
         for (int i = 0; i < 30; i++) {
             for (int startAddr = 2; startAddr <= 96; startAddr += 2) {
                 ssd->write(startAddr, "0x12345678");
                 ssd->write(startAddr, "0x87654321");
+
                 ssd->erase(startAddr, 3);
 
                 if (didReadFail(ssd->read(startAddr), "0x00000000"))
