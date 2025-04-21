@@ -30,13 +30,15 @@ public:
     string groupWriteAndReadCompare(Logger* logger, int startAddr, int endAddr, string value)
     {
         for (int addr = startAddr; addr < endAddr; addr++) {
-            logger->Print("1_FullWriteAndReadCompare.write()", "write value " + value + " at " + std::to_string(addr));
+            if (logger != nullptr)
+                logger->Print("1_FullWriteAndReadCompare.write()", "write value " + value + " at " + std::to_string(addr));
             ssd->write(addr, value);
         }
 
         for (int addr = startAddr; addr < endAddr; addr++) {
             if (didReadFail(ssd->read(addr), value)) {
-                logger->Print("1_FullWriteAndReadCompare.readCompare()", "fail - expected " + value + " but wrong value at " + std::to_string(addr));
+                if (logger != nullptr)
+                    logger->Print("1_FullWriteAndReadCompare.readCompare()", "fail - expected " + value + " but wrong value at " + std::to_string(addr));
                 return "FAIL";
             }
         }

@@ -19,12 +19,15 @@ public:
     {
         for (int i = 0; i < 200; i++) {
             string value = randomValue();
-            logger->Print("3_WriteReadAging.write()", "write value " + value + " at 0");
+            if (logger != nullptr)
+                logger->Print("3_WriteReadAging.write()", "write value " + value + " at 0");
             ssd->write(0, value);
-            logger->Print("3_WriteReadAging.write()", "write value " + value + " at 99");
+            if (logger != nullptr)
+                logger->Print("3_WriteReadAging.write()", "write value " + value + " at 99");
             ssd->write(99, value);
             if (didReadFail(ssd->read(0), ssd->read(99))) {
-                logger->Print("3_WriteReadAging.readCompare()", "fail - values mismatch");
+                if (logger != nullptr)
+                    logger->Print("3_WriteReadAging.readCompare()", "fail - values mismatch");
                 return "FAIL";
             }
         }

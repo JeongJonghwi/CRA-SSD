@@ -13,7 +13,7 @@ public:
         : ssd(ssd)
     {
     }
-    virtual ~TestShell() { logger.CloseLogger(); }
+    virtual ~TestShell() {}
     string read(uint32_t address);
     string write(uint32_t address, string value);
     string help();

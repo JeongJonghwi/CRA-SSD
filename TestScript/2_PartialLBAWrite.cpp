@@ -24,13 +24,15 @@ public:
 
         for (int i = 0; i < 30; i++) {
             for (auto o : order) {
-                logger->Print("2_PartialLBAWrite.write()", "write value " + value + " at " + std::to_string(o));
+                if (logger != nullptr)
+                    logger->Print("2_PartialLBAWrite.write()", "write value " + value + " at " + std::to_string(o));
                 ssd->write(o, value);
             }
 
             for (auto o : order) {
                 if (didReadFail(ssd->read(o), value)) {
-                    logger->Print("2_PartialLBAWrite.readCompare()", "fail - expected " + value + " but wrong value at " + std::to_string(o));
+                    if (logger != nullptr)
+                        logger->Print("2_PartialLBAWrite.readCompare()", "fail - expected " + value + " but wrong value at " + std::to_string(o));
                     return "FAIL";
                 }
             }
