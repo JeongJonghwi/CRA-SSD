@@ -2,11 +2,7 @@
 #include "command_buffer_manager.h"
 
 #define TEST (0)
-#if TEST
-#include <iostream>
-#include <cstring>
-#endif
-
+#if (TEST == 0)
 #ifdef _DEBUG
 #include "gmock/gmock.h"
 
@@ -18,7 +14,6 @@ int main(void)
 #else
 int main(int argc, char* argv[])
 {
-#if (TEST == 0)
     SSD ssd;
     CmdType cmd;
     CommandBufferManager buffermanager { &ssd };
@@ -60,7 +55,15 @@ int main(int argc, char* argv[])
         buffermanager.Flush();
     }
     }
+
+    return 0;
+}
+#endif
 #else
+#include <iostream>
+#include <cstring>
+int main(int argc, char* argv[])
+{
     argc = 1;
     char input[5][20];
     while (true) {
@@ -99,7 +102,6 @@ int main(int argc, char* argv[])
     }
     case WRITE:
     {
-        // ssd.Write(lba, value);
         buffermanager.AddWrite(lba, value);
         break;
     }
@@ -108,12 +110,10 @@ int main(int argc, char* argv[])
         if (value == 0) {
             break;
         }
-        // ssd.Erase(lba, value);
         buffermanager.AddErase(lba, value);
         break;
     }
     }
-#endif
 
     return 0;
 }
