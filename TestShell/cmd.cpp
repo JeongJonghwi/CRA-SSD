@@ -7,6 +7,12 @@ using std::vector;
 
 class CMD {
 public:
+    CMD()
+        : input { "" }
+        , address { 0 }
+        , data { "" }
+        , size { 0 } {};
+
     bool validCheck(string command)
     {
         vector<string> rawdata = splitBySpace(command);

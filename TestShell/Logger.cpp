@@ -33,7 +33,7 @@ Logger::~Logger() {
 
 void Logger::Print(const string& logingFunctionStr, const string& loggingMessage) {
     char messageChar[LOGGING_LINE_SIZE];
-    string currentTimeStr = GetCurrentTime("%y.%m.%d %H:%M");
+    string currentTimeStr = GetCurTime("%y.%m.%d %H:%M");
 
     snprintf(messageChar, LOGGING_LINE_SIZE, "%s %40s : %s", currentTimeStr.c_str(),
         logingFunctionStr.c_str(), loggingMessage.c_str());
@@ -47,7 +47,8 @@ void Logger::Print(const string& logingFunctionStr, const string& loggingMessage
     }
 }
 
-string Logger::GetCurrentTime(const char* format) const {
+string Logger::GetCurTime(const char* format) const
+{
     // convert time_t to string
     std::tm localTime = GetCurrentTimeStruct();
 
@@ -87,7 +88,9 @@ void Logger::WriteLog(const string& log) {
 
 void Logger::RenameLogFile(const string& oldLogFileName, const string& newLogFileName)
 {
-    rename(oldLogFileName.c_str(), newLogFileName.c_str());
+    int ret = rename(oldLogFileName.c_str(), newLogFileName.c_str());
+    if (ret)
+        exit(EXIT_FAILURE);
 }
 
 bool Logger::BackupLogFile() {
