@@ -1,25 +1,28 @@
 #pragma once
-#include <string>
 #include <cstdio>
 #include <set>
+#include <string>
 
 using std::string;
 
 class Logger {
 public:
-    Logger();
     virtual ~Logger();
     void Print(const string& logingFunctionStr, const string& loggingMessage);
+    void CloseLogger();
+    static Logger& getInstance();
 
 private:
-    string GetCurTime(const char* format) const;
+    Logger();
     bool OpenLastLogFile();
-    bool isOverLogFileSize();
-    void WriteLog(const string& log);
-    void RenameLogFile(const string& oldLogFileName, const string& newLogFileName);
-    bool BackupLogFile();
-    std::tm GetCurrentTimeStruct() const;
+    bool IsOverLogFileSize() const;
     void FindFilesWithExtension(const string& folderPath, const string& extension);
+    bool BackupLogFile();
+    void WriteLog(const string& log) const;
+    void RenameLogFile(const string& oldLogFileName, const string& newLogFileName) const;
+
+    string GetCurTime(const char* format) const;
+    std::tm GetCurrentTimeStruct() const;
 
     FILE* loggerFilePointer;
     string backupFileName;
