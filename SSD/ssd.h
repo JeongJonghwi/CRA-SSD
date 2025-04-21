@@ -12,6 +12,8 @@ using std::string;
 #define SSD_NAND_FILE_NAME "ssd_nand.txt"
 #define SSD_OUTPUT_FILE_NAME "ssd_output.txt"
 #define SSD_ERROR_STRING "ERROR"
+#define MIN_COUNT (0)
+#define MAX_COUNT (10)
 
 enum CmdType {
     CMD_START = 0,

@@ -5,8 +5,6 @@
 #define MIN_LBA (0)
 #define MAX_LBA (99)
 #define VALUE_INPUT_LENGTH (10)
-#define MIN_COUNT (0)
-#define MAX_COUNT (10)
 
 #define READ_ARG_NUM (3)
 #define WRITE_ARG_NUM (4)
