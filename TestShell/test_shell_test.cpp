@@ -1,7 +1,7 @@
-#include "ssd_interface.h"
-#include "test_script_interface.h"
 #include "real_ssd.h"
 #include "shell.h"
+#include "ssd_interface.h"
+#include "test_script_interface.h"
 #include "gmock/gmock.h"
 
 using namespace testing;
@@ -33,12 +33,11 @@ public:
 
 class ShellTestFixture : public TestFixture { };
 
-
 typedef ITestScript* (*CreateScriptFunc)(SSD*);
 
-class ShellTestScriptFixture : public TestFixture { 
+class ShellTestScriptFixture : public TestFixture {
 
- public:
+public:
     string launchDLLfunction(string scriptName)
     {
         HMODULE hDll = LoadLibraryA("TestScript.dll");
@@ -47,7 +46,7 @@ class ShellTestScriptFixture : public TestFixture {
             return "Failed to load DLL!";
         }
 
-        CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, ("CreateScript_" +scriptName).c_str());
+        CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, ("CreateScript_" + scriptName).c_str());
         if (!createScript) {
             return "Failed to get CreateScript function!";
         }
@@ -185,6 +184,30 @@ TEST_F(ShellTestFixture, fullReadTest)
     ts.fullRead();
 }
 
+TEST_F(ShellTestScriptFixture, fullWriteAndReadTest)
+{
+    for (int groupStart = 0; groupStart < 100; groupStart += 5) {
+
+        std::stringstream ss;
+        ss << std::hex << std::setw(2) << std::setfill('0') << groupStart;
+        string value = "0x123456" + ss.str();
+        std::transform(value.begin() + 2, value.end(), value.begin() + 2, ::toupper);
+
+        for (int subIndex = 0; subIndex < 5; subIndex++) {
+            uint32_t lba = groupStart + subIndex;
+            EXPECT_CALL(ssd, write(lba, _))
+                .Times(1);
+            EXPECT_CALL(ssd, read(lba))
+                .Times(1)
+                .WillRepeatedly(Return(value));
+        }
+    }
+
+    string expected = "PASS";
+    string actual = launchDLLfunction("1_FullWriteAndReadCompare");
+    EXPECT_EQ(expected, actual);
+}
+
 TEST_F(ShellTestScriptFixture, partialLBAWriteTest)
 {
     EXPECT_CALL(ssd, write(_, _))
@@ -217,7 +240,6 @@ TEST_F(ShellTestScriptFixture, writeReadAging)
     string actual = launchDLLfunction("3_WriteReadAging");
     EXPECT_EQ(expected, actual);
 }
-
 
 TEST_F(ShellTestScriptFixture, eraseAndWriteAging)
 {
@@ -282,7 +304,6 @@ TEST_F(InvalidCMDTestFixture, fullWriteFailWithInvalidValue)
     validNotOkay("fullwrite " + INVALID_VALUE);
 }
 
-
 TEST_F(SSDFixture, writeAndReadWithRealSSD)
 {
     string expected = "Done";
@@ -311,7 +332,6 @@ TEST_F(SSDFixture, eraseAndReadWithRealSSD)
     EXPECT_EQ(expected, actual);
     EXPECT_EQ(ts.read(VALID_ADDRESS), "0x00000000");
 }
-
 
 TEST_F(SSDFixture, eraseFailAndReadWithRealSSD)
 {
