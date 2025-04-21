@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <sstream>
 #include <io.h>
-#include <filesystem>
 
 #define LOGGING_LINE_SIZE 256
 #define LOGGING_LAST_LOG_FILE_NAME "latest.log"
@@ -50,10 +49,10 @@ void Logger::Print(const string& logingFunctionStr, const string& loggingMessage
 
 string Logger::GetCurrentTime(const char* format) const {
     // convert time_t to string
-    std::tm* localTime = GetCurrentTimeStruct();
+    std::tm localTime = GetCurrentTimeStruct();
 
     std::ostringstream oss;
-    oss << std::put_time(localTime, format); // 포맷 지정
+    oss << std::put_time(&localTime, format); // 포맷 지정
     std::string timeString = "[" + oss.str() + "]";
 
     return timeString;
@@ -61,13 +60,13 @@ string Logger::GetCurrentTime(const char* format) const {
 
 bool Logger::OpenLastLogFile() {
     if (_access_s(LOGGING_LAST_LOG_FILE_NAME, 0) != 0) {
-        if ((loggerFilePointer = std::fopen(LOGGING_LAST_LOG_FILE_NAME, "w+")) == nullptr) {
+        if (fopen_s(&loggerFilePointer, LOGGING_LAST_LOG_FILE_NAME, "w+") != 0) {
             return false;
         }
-        return false;;
+        return false;
     }
 
-    if ((loggerFilePointer = std::fopen(LOGGING_LAST_LOG_FILE_NAME, "r+")) == nullptr) {
+    if (fopen_s(&loggerFilePointer, LOGGING_LAST_LOG_FILE_NAME, "r+") != 0) {
         return false;
     }
 
@@ -75,30 +74,30 @@ bool Logger::OpenLastLogFile() {
 }
 
 bool Logger::isOverLogFileSize() {
-    std::fseek(loggerFilePointer, 0, SEEK_END);
+    fseek(loggerFilePointer, 0, SEEK_END);
     long fileSize = std::ftell(loggerFilePointer);
 
     return fileSize > static_cast<long>(LOGGING_MAX_LOG_FILE_SIZE);
 }
 
 void Logger::WriteLog(const string& log) {
-    std::fprintf(loggerFilePointer, "%s\n", log.c_str());
+    fprintf(loggerFilePointer, "%s\n", log.c_str());
     //fflush(loggerFilePointer);
 }
 
 void Logger::RenameLogFile(const string& oldLogFileName, const string& newLogFileName)
 {
-    std::rename(oldLogFileName.c_str(), newLogFileName.c_str());
+    rename(oldLogFileName.c_str(), newLogFileName.c_str());
 }
 
 bool Logger::BackupLogFile() {
-    std::fclose(loggerFilePointer);
-    std::tm* localTime = GetCurrentTimeStruct();
+    fclose(loggerFilePointer);
+    std::tm localTime = GetCurrentTimeStruct();
 
     char currentTimeChar[LOGGING_LINE_SIZE];
 
-    snprintf(currentTimeChar, LOGGING_LINE_SIZE, "until_%02d%02d%02d_%02dh_%02dm_%02ds.log", localTime->tm_year - 100,
-        localTime->tm_mon, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
+    snprintf(currentTimeChar, LOGGING_LINE_SIZE, "until_%02d%02d%02d_%02dh_%02dm_%02ds.log", localTime.tm_year - 100,
+        localTime.tm_mon, localTime.tm_mday, localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
     string logFileName { currentTimeChar };
 
     if (backupFileName != "") {
@@ -107,14 +106,14 @@ bool Logger::BackupLogFile() {
     }
     backupFileName = logFileName;
     RenameLogFile(LOGGING_LAST_LOG_FILE_NAME, logFileName);
-    if ((loggerFilePointer = std::fopen(LOGGING_LAST_LOG_FILE_NAME, "w")) == nullptr) {
+    if (fopen_s(&loggerFilePointer,LOGGING_LAST_LOG_FILE_NAME, "w") != 0) {
         return false;
     }
 
     return true;
 }
 
-std::tm* Logger::GetCurrentTimeStruct() const
+std::tm Logger::GetCurrentTimeStruct() const
 {
     // get current time
     auto now = std::chrono::system_clock::now();
@@ -123,21 +122,29 @@ std::tm* Logger::GetCurrentTimeStruct() const
     std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
 
     // convert time_t to string
-    std::tm* localTime = std::localtime(&currentTime);
+    std::tm localTime;
+    localtime_s(&localTime, & currentTime);
 
     return localTime;
 }
 
 void Logger::FindFilesWithExtension(const string& directoryPath, const string& extension)
 {
-    try {
-        for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
-            if (entry.is_regular_file() && entry.path().extension() == extension && 
-                entry.path().filename().string() != LOGGING_LAST_LOG_FILE_NAME) {
-                backupFileList.insert(entry.path().filename().string());
-            }
-        }
-    } catch (const std::filesystem::filesystem_error& e) {
-        //
+    _finddata_t fd;
+    intptr_t handle;
+    string path = directoryPath + "*" + extension;
+
+    if ((handle = _findfirst(path.c_str(), &fd)) == -1L) {
+        return;
     }
+
+    do {
+        string fileName = string(fd.name);
+
+        if (fileName == LOGGING_LAST_LOG_FILE_NAME)
+            continue;
+
+        backupFileList.insert(fileName);
+    } while (_findnext(handle, &fd) == 0);
+    _findclose(handle);
 }
