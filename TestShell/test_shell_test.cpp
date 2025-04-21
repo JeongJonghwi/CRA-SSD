@@ -25,7 +25,6 @@ class TestFixture : public Test {
 public:
     MockSSD ssd;
     TestShell ts { &ssd };
-    TestScript script { &ssd };
 };
 
 class SSDFixture : public Test {
@@ -35,7 +34,34 @@ public:
 };
 
 class ShellTestFixture : public TestFixture { };
-class ShellTestScriptFixture : public TestFixture { };
+
+
+typedef ITestScript* (*CreateScriptFunc)(SSD*);
+
+class ShellTestScriptFixture : public TestFixture { 
+
+ public:
+    string launchDLLfunction(string scriptName)
+    {
+        HMODULE hDll = LoadLibraryA("TestScript.dll");
+
+        if (!hDll) {
+            std::cerr << "Failed to load DLL!" << std::endl;
+        }
+
+        CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, ("CreateScript_" +scriptName).c_str());
+        if (!createScript) {
+            std::cerr << "Failed to get CreateScript function!" << std::endl;
+        }
+
+        ITestScript* script = createScript(&ssd);
+        string actual = script->Run();
+        delete script;
+        FreeLibrary(hDll);
+        return actual;
+    }
+};
+
 class InvalidCMDTestFixture : public TestFixture {
 public:
     void validNotOkay(string command)
@@ -131,16 +157,6 @@ TEST_F(ShellTestFixture, fullReadTest)
     ts.fullRead();
 }
 
-TEST_F(ShellTestScriptFixture, groupWriteAndReadCompare)
-{
-    EXPECT_CALL(ssd, write(_, _)).Times(5);
-    EXPECT_CALL(ssd, read(_)).Times(5).WillRepeatedly(Return(VALID_VALUE));
-
-    string expected = "PASS";
-    string actual = script.groupWriteAndReadCompare(5, 10, VALID_VALUE);
-    EXPECT_EQ(expected, actual);
-}
-
 TEST_F(ShellTestScriptFixture, partialLBAWriteTest)
 {
     EXPECT_CALL(ssd, write(_, _))
@@ -151,7 +167,7 @@ TEST_F(ShellTestScriptFixture, partialLBAWriteTest)
         .WillRepeatedly(Return(VALID_VALUE));
 
     string expected = "PASS";
-    string actual = script.partialLBAWrite(VALID_VALUE);
+    string actual = launchDLLfunction("2_PartialLBAWrite");
     EXPECT_EQ(expected, actual);
 }
 
@@ -170,7 +186,7 @@ TEST_F(ShellTestScriptFixture, writeReadAging)
     EXPECT_CALL(ssd, write(99, _)).Times(200);
 
     string expected = "PASS";
-    string actual = script.writeReadAging(VALID_VALUE);
+    string actual = launchDLLfunction("3_WriteReadAging");
     EXPECT_EQ(expected, actual);
 }
 
@@ -189,7 +205,7 @@ TEST_F(ShellTestScriptFixture, eraseAndWriteAging)
     }
 
     string expected = "PASS";
-    string actual = script.eraseAndWriteAging();
+    string actual = launchDLLfunction("4_EraseAndWriteAging");
     EXPECT_EQ(expected, actual);
 }
 
@@ -250,36 +266,6 @@ TEST_F(SSDFixture, writeWithRealSSD)
 {
     string expected = "Done";
     string actual = ts.write(VALID_ADDRESS, VALID_VALUE);
-
-    EXPECT_EQ(expected, actual);
-}
-
-typedef ITestScript* (*CreateScriptFunc)(SSD*);
-
-TEST(TestScriptDLL, dllRunTest)
-{
-    MockSSD ssd;
-    EXPECT_CALL(ssd, read(_))
-        .Times(1)
-        .WillRepeatedly(Return("0x10000000"));
-
-    HMODULE hDll = LoadLibraryA("TestScript.dll");
-    
-    if (!hDll) {
-        std::cerr << "Failed to load DLL!" << std::endl;
-    }
-
-    string scriptName = "CreateScript_1_FullWriteAndReadCompare";
-    CreateScriptFunc createScript = (CreateScriptFunc)GetProcAddress(hDll, scriptName.c_str());
-    if (!createScript) {
-        std::cerr << "Failed to get CreateScript function!" << std::endl;
-    }
-
-    ITestScript* script = createScript(&ssd);
-    string actual = script->Run();
-    delete script;
-    FreeLibrary(hDll);
-    string expected = "Run In DLL";
 
     EXPECT_EQ(expected, actual);
 }

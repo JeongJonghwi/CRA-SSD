@@ -35,5 +35,11 @@
     <ClCompile Include="2_PartialLBAWrite.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="3_WriteReadAging.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="4_EraseAndWriteAging.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

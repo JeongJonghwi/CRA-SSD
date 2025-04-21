@@ -4,33 +4,29 @@
 
 #include <iostream>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
 #include <vector>
 
-class PartialWriteAndReadCompareScript : public ITestScript {
+class WrtieReadAgingScript : public ITestScript {
 public:
-    PartialWriteAndReadCompareScript(SSD* ssd)
+    WrtieReadAgingScript(SSD* ssd)
         : ssd(ssd)
-    {   
+    {
     }
 
     string Run() override
     {
-        string value = "0x12345678";
+        string value = randomValue();
 
         if (!isValidValue(value))
             return "FAIL";
 
-        std::vector<int> order = { 4, 0, 3, 1, 2 };
-
-        for (int i = 0; i < 30; i++) {
-            for (auto o : order) {
-                ssd->write(o, value);
-            }
-
-            for (auto o : order) {
-                if (didReadFail(ssd->read(o), value))
-                    return "FAIL";
-            }
+        for (int i = 0; i < 200; i++) {
+            ssd->write(0, value);
+            ssd->write(99, value);
+            if (didReadFail(ssd->read(0), ssd->read(99)))
+                return "FAIL";
         }
         return "PASS";
     }
@@ -61,14 +57,23 @@ private:
         }
         return true;
     }
+
+    string randomValue()
+    {
+        unsigned int random_value = static_cast<unsigned int>(std::rand());
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << random_value;
+        std::string hexStr = "0x" + ss.str();
+        return hexStr;
+    }
 };
 
-extern "C" __declspec(dllexport) ITestScript* CreateScript_2_(SSD* ssd)
+extern "C" __declspec(dllexport) ITestScript* CreateScript_3_(SSD* ssd)
 {
-    return new PartialWriteAndReadCompareScript(ssd);
+    return new WrtieReadAgingScript(ssd);
 }
 
-extern "C" __declspec(dllexport) ITestScript* CreateScript_2_PartialLBAWrite(SSD* ssd)
+extern "C" __declspec(dllexport) ITestScript* CreateScript_3_WriteReadAging(SSD* ssd)
 {
-    return new PartialWriteAndReadCompareScript(ssd);
+    return new WrtieReadAgingScript(ssd);
 }
