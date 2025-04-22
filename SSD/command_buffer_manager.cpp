@@ -7,9 +7,8 @@
 using std::max;
 using std::min;
 
-CommandBufferManager::CommandBufferManager(SSD* ssd)
+CommandBufferManager::CommandBufferManager()
 {
-    this->ssd = ssd;
     if (CheckDirectoryExists(BUFFER_DIRECTORY_NAME)) {
         CreateFolder();
         valid_count = 0;
@@ -19,23 +18,29 @@ CommandBufferManager::CommandBufferManager(SSD* ssd)
     }
 }
 
+CommandBufferManager& CommandBufferManager::GetInstance()
+{
+    static CommandBufferManager instance;
+    return instance;
+}
+
 void CommandBufferManager::FastRead(uint32_t lba)
 {
     for (const auto& command : commands) {
         if (command.type == WRITE) {
             if (command.lba == lba) {
-                ssd->WriteToOutputFile(command.value);
+                ssd.WriteToOutputFile(command.value);
                 return;
             }
         } else if (command.type == ERASE) {
             if (lba >= command.lba && lba <= command.GetEnd()) {
-                ssd->WriteToOutputFile(0);
+                ssd.WriteToOutputFile(0);
                 return;
             }
         }
     }
 
-    ssd->Read(lba);
+    ssd.Read(lba);
 }
 
 void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
@@ -88,10 +93,10 @@ bool CommandBufferManager::Flush()
     for (list<Command>::reverse_iterator iter = commands.rbegin(); iter != commands.rend(); iter++) {
         switch (iter->type) {
         case WRITE:
-            ssd->Write(iter->lba, iter->value);
+            ssd.Write(iter->lba, iter->value);
             break;
         case ERASE:
-            ssd->Erase(iter->lba, iter->value);
+            ssd.Erase(iter->lba, iter->value);
             break;
         default:
             break;
@@ -159,7 +164,7 @@ void CommandBufferManager::ScanFiles()
 
             start = end + 1;
             end = filename.find('_', start);
-            command.type = static_cast<CmdType>(SSD::GetCmdType(filename.substr(start, end - start)));
+            command.type = static_cast<CmdType>(ssd.GetCmdType(filename.substr(start, end - start)));
 
             start = end + 1;
             end = filename.find('_', start);

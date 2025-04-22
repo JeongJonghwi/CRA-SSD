@@ -9,7 +9,7 @@ using testing::Test;
 
 class SSDTestFixture : public Test {
 public:
-    SSD ssd;
+    SSD& ssd = SSD::GetInstance();
     char strReadValue[20];
 
     string getSsdLbaValue(uint32_t lba)

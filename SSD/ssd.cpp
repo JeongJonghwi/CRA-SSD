@@ -35,6 +35,13 @@ SSD::SSD()
     fclose(fp);
 }
 
+
+SSD& SSD::GetInstance()
+{
+    static SSD instance;
+    return instance;
+}
+
 bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value)
 {
     bool valid = true;

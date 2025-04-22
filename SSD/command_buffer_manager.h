@@ -44,16 +44,20 @@ struct Command {
 
 class CommandBufferManager {
 public:
-    CommandBufferManager(SSD* ssd);
+    static CommandBufferManager& GetInstance();
     void FastRead(uint32_t lba);
     void AddWrite(uint32_t lba, uint32_t value);
     void AddErase(uint32_t lba, uint32_t value);
     bool Flush();
 
 private:
-    SSD* ssd;
+    SSD& ssd = SSD::GetInstance();;
     uint32_t valid_count;
     list<Command> commands;
+
+    explicit CommandBufferManager();
+    CommandBufferManager(const CommandBufferManager& buffermanager) = delete;
+    CommandBufferManager& operator=(const CommandBufferManager& buffermanager) = delete;
 
     bool CheckDirectoryExists(const string& path);
     void CreateFolder();
