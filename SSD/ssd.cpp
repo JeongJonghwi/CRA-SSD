@@ -20,19 +20,7 @@ SSD::SSD()
     if (_access_s(SSD_NAND_FILE_NAME, 0) == 0)
         return;
 
-    FILE* fp = nullptr;
-
-    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
-        exit(0);
-    }
-
-    uint32_t nandBuff[MAX_LBA + 1];
-
-    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
-    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
-
-    fflush(fp);
-    fclose(fp);
+    InitializeNandFile();
 }
 
 
@@ -65,6 +53,23 @@ bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT ui
     }
 
     return valid;
+}
+
+void SSD::InitializeNandFile()
+{
+    FILE* fp = nullptr;
+
+    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
+        exit(0);
+    }
+
+    uint32_t nandBuff[MAX_LBA + 1];
+
+    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
+    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
+
+    fflush(fp);
+    fclose(fp);
 }
 
 bool SSD::WriteToOutputFileError()
@@ -175,23 +180,6 @@ CmdType SSD::GetCmdType(const string& str)
     }
 
     return ret;
-}
-
-void SSD::InitializeNandFile()
-{
-    FILE* fp = nullptr;
-
-    if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
-        exit(0);
-    }
-
-    uint32_t nandBuff[MAX_LBA + 1];
-
-    memset(nandBuff, 0x0, sizeof(uint32_t) * (MAX_LBA + 1));
-    fwrite(nandBuff, sizeof(uint32_t) * (MAX_LBA + 1), 1, fp);
-
-    fflush(fp);
-    fclose(fp);
 }
 
 bool SSD::CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd)
