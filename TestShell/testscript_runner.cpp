@@ -1,10 +1,4 @@
 #include "testscript_runner.h"
-#include "test_script_interface.h"
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include "Logger.h"
 
 typedef ITestScript* (*CreateScriptFunc)(SSD*);
 
@@ -36,15 +30,6 @@ void TestScriptRunner::txtFileTestRun(string filename)
     }
 }
 
-string TestScriptRunner::randomValue()
-{
-    unsigned int random_value = static_cast<unsigned int>(std::rand());
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << random_value;
-    std::string hexStr = "0x" + ss.str();
-    return hexStr;
-}
-
 string TestScriptRunner::testRun(string command)
 {
     HMODULE hDll = LoadLibraryA("TestScript.dll");
@@ -62,9 +47,9 @@ string TestScriptRunner::testRun(string command)
 
     ITestScript* script = createScript(ssd);
 
-	logger.Print("TestScriptRunner.testRun()", "Test " + command + " Start!");
+    logger.Print("TestScriptRunner.testRun()", "Test " + command + " Start!");
     string result = script->Run(&logger);
-	logger.Print("TestScriptRunner.testRun()", "Test " + command + " End! result = " + result);
+    logger.Print("TestScriptRunner.testRun()", "Test " + command + " End! result = " + result);
     delete script;
     FreeLibrary(hDll);
 

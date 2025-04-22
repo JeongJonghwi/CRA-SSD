@@ -1,11 +1,14 @@
 #pragma once
-#include <windows.h>
-#include <vector>
-#include <string>
-#include <random>
-
-#include "ssd_interface.h"
 #include "Logger.h"
+#include "ssd_interface.h"
+#include "test_script_interface.h"
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <windows.h>
 
 using std::string;
 using std::vector;
@@ -24,6 +27,5 @@ public:
 private:
     Logger& logger = Logger::getInstance();
     vector<string> readFileLines(const string&);
-    string randomValue();
-    SSD *ssd;
+    SSD* ssd;
 };
