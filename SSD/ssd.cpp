@@ -49,7 +49,7 @@ bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT ui
     if (*cmd == WRITE) {
         valid = valid && CheckValue(argc, argv, value);
     } else { // ERASE
-        valid = valid && CheckCount(argc, argv, value);
+        valid = valid && CheckCount(argc, argv, *lba, value);
     }
 
     return valid;
@@ -246,7 +246,7 @@ bool SSD::CheckValue(int argc, char* argv[], OUT uint32_t* value)
     return true;
 }
 
-bool SSD::CheckCount(int argc, char* argv[], OUT uint32_t* count)
+bool SSD::CheckCount(int argc, char* argv[], uint32_t lba, OUT uint32_t* count)
 {
     for (int i = 0; i < strlen(argv[PARAM_VALUE]); i++) {
         if (argv[PARAM_VALUE][i] < '0' || argv[PARAM_VALUE][i] > '9') {
@@ -256,6 +256,9 @@ bool SSD::CheckCount(int argc, char* argv[], OUT uint32_t* count)
 
     *count = atoi(argv[PARAM_VALUE]);
     if (*count < MIN_COUNT || *count > MAX_COUNT) {
+        return false;
+    }
+    if (lba + *count > MAX_LBA + 1) {
         return false;
     }
 
