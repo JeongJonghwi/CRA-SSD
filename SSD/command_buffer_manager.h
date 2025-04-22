@@ -1,12 +1,12 @@
 #pragma once
 
-#include <string>
+#include "ssd.h"
 #include <list>
 #include <stdint.h>
-#include "ssd.h"
+#include <string>
 
-using std::string;
 using std::list;
+using std::string;
 using std::to_string;
 
 #define BUFFER_DIRECTORY_NAME "Buffer"
@@ -14,13 +14,25 @@ using std::to_string;
 
 struct Command {
     Command()
-        : order{0}, lba{0}, value{0}, type{INVALID_CMD} {}
-    Command(uint32_t order, uint32_t lba, uint32_t value, CmdType type) 
-        : order{order}, lba{lba}, value{value}, type{type} {}
-    bool operator<(const Command& other) const {
+        : order { 0 }
+        , lba { 0 }
+        , value { 0 }
+        , type { INVALID_CMD }
+    {
+    }
+    Command(uint32_t order, uint32_t lba, uint32_t value, CmdType type)
+        : order { order }
+        , lba { lba }
+        , value { value }
+        , type { type }
+    {
+    }
+    bool operator<(const Command& other) const
+    {
         return order > other.order;
     }
-    uint32_t GetEnd() const {
+    uint32_t GetEnd() const
+    {
         return lba + value - 1;
     }
 
@@ -49,7 +61,7 @@ private:
     void CreateEmptyFile(const char* fileName);
 
     list<Command>::iterator Delete(list<Command>::iterator iter);
-    string GetFileName(Command &command);
+    string GetFileName(Command& command);
     string GetFileName(uint32_t order, CmdType type, uint32_t lba, uint32_t value);
     void Rename(list<Command>::iterator iter, int32_t order, CmdType type, uint32_t lba, uint32_t value);
     void Invalidate(Command& command);

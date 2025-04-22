@@ -1,11 +1,11 @@
 #include "command_buffer_manager.h"
-#include <windows.h>
+#include <algorithm>
 #include <cstdlib>
 #include <io.h>
-#include <algorithm>
+#include <windows.h>
 
-using std::min;
 using std::max;
+using std::min;
 
 CommandBufferManager::CommandBufferManager(SSD* ssd)
 {
@@ -21,22 +21,20 @@ CommandBufferManager::CommandBufferManager(SSD* ssd)
 
 void CommandBufferManager::FastRead(uint32_t lba)
 {
-    for (const auto& command : commands)
-    {
+    for (const auto& command : commands) {
         if (command.type == WRITE) {
             if (command.lba == lba) {
                 ssd->WriteToOutputFile(command.value);
                 return;
             }
-        }
-        else if (command.type == ERASE) {
+        } else if (command.type == ERASE) {
             if (lba >= command.lba && lba <= command.GetEnd()) {
                 ssd->WriteToOutputFile(0);
                 return;
             }
         }
     }
-    
+
     ssd->Read(lba);
 }
 
@@ -46,8 +44,7 @@ void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
         Flush();
     }
 
-    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();)
-    {
+    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();) {
         if (iter->lba == lba) {
             iter = Delete(iter);
             continue;
@@ -56,7 +53,7 @@ void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
     }
 
     AddCommand(WRITE, lba, value);
-    
+
     MergeErase();
 }
 
@@ -86,7 +83,8 @@ void CommandBufferManager::AddErase(uint32_t lba, uint32_t value)
     MergeErase();
 }
 
-bool CommandBufferManager::Flush() {
+bool CommandBufferManager::Flush()
+{
     for (list<Command>::reverse_iterator iter = commands.rbegin(); iter != commands.rend(); iter++) {
         switch (iter->type) {
         case WRITE:
@@ -157,20 +155,20 @@ void CommandBufferManager::ScanFiles()
 
             start = 0;
             end = filename.find('_');
-            command.order = static_cast<uint32_t>(stoul(filename.substr(start, end-start)));
+            command.order = static_cast<uint32_t>(stoul(filename.substr(start, end - start)));
 
             start = end + 1;
             end = filename.find('_', start);
-            command.type = static_cast<CmdType>(SSD::GetCmdType(filename.substr(start, end-start)));
+            command.type = static_cast<CmdType>(SSD::GetCmdType(filename.substr(start, end - start)));
 
             start = end + 1;
             end = filename.find('_', start);
-            command.lba = static_cast<uint32_t>(stoul(filename.substr(start, end-start)));
+            command.lba = static_cast<uint32_t>(stoul(filename.substr(start, end - start)));
 
             start = end + 1;
             end = filename.find('_', start);
-            command.value = static_cast<uint32_t>(stoul(filename.substr(start, end-start)));    // decimal
-        
+            command.value = static_cast<uint32_t>(stoul(filename.substr(start, end - start))); // decimal
+
             commands.push_back(command);
         }
     } while (_findnext(handle, &fd) == 0);
@@ -189,8 +187,8 @@ list<Command>::iterator CommandBufferManager::Delete(list<Command>::iterator ite
     }
 
     list<Command>::iterator it = iter;
-    for (it--; ; it--) {
-        Rename(it, it->order-1, it->type, it->lba, it->value);
+    for (it--;; it--) {
+        Rename(it, it->order - 1, it->type, it->lba, it->value);
         it->order--;
         if (it == commands.begin()) {
             break;
@@ -200,7 +198,7 @@ list<Command>::iterator CommandBufferManager::Delete(list<Command>::iterator ite
     return iter;
 }
 
-string CommandBufferManager::GetFileName(Command &command)
+string CommandBufferManager::GetFileName(Command& command)
 {
     string combined = string(BUFFER_DIRECTORY_NAME) + "\\";
     combined += to_string(command.order);
@@ -216,7 +214,7 @@ string CommandBufferManager::GetFileName(uint32_t order, CmdType type, uint32_t 
     combined += to_string(order);
     combined += "_" + cmd_symbol[type];
     combined += "_" + to_string(lba);
-    combined += "_" + to_string(value);         // decimal
+    combined += "_" + to_string(value); // decimal
     return combined;
 }
 
@@ -244,8 +242,7 @@ void CommandBufferManager::AddCommand(CmdType type, uint32_t lba, uint32_t value
 
 void CommandBufferManager::MergeErase()
 {
-    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();)
-    {
+    for (list<Command>::iterator iter = commands.begin(); iter != commands.end();) {
         if (iter->type == ERASE) {
             list<Command>::iterator next = iter;
             next++;
@@ -262,12 +259,12 @@ void CommandBufferManager::MergeErase()
                 uint32_t new_start = min(start1, start2);
                 uint32_t new_end = max(end1, end2);
                 uint32_t new_size = new_end - new_start + 1;
-                
+
                 if (new_size > MAX_COUNT) {
                     iter = next;
                     continue;
                 }
-                
+
                 Delete(iter);
                 Rename(next, next->order, next->type, new_start, new_size);
                 next->lba = new_start;

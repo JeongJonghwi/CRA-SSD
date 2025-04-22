@@ -1,5 +1,5 @@
-#include "ssd.h"
 #include "command_buffer_manager.h"
+#include "ssd.h"
 
 #define TEST (0)
 #if (TEST == 0)
@@ -25,18 +25,15 @@ int main(int argc, char* argv[])
     }
 
     switch (cmd) {
-    case READ:
-    {
+    case READ: {
         buffermanager.FastRead(lba);
         break;
     }
-    case WRITE:
-    {
+    case WRITE: {
         buffermanager.AddWrite(lba, value);
         break;
     }
-    case ERASE:
-    {
+    case ERASE: {
         if (value == 0) {
             break;
         }
@@ -52,8 +49,8 @@ int main(int argc, char* argv[])
 }
 #endif
 #else
-#include <iostream>
 #include <cstring>
+#include <iostream>
 int main(int argc, char* argv[])
 {
     argc = 1;
@@ -79,18 +76,15 @@ int main(int argc, char* argv[])
     }
 
     switch (cmd) {
-    case READ:
-    {
+    case READ: {
         buffermanager.FastRead(lba);
         break;
     }
-    case WRITE:
-    {
+    case WRITE: {
         buffermanager.AddWrite(lba, value);
         break;
     }
-    case ERASE:
-    {
+    case ERASE: {
         if (value == 0) {
             break;
         }
