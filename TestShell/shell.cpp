@@ -22,12 +22,15 @@ string TestShell::help()
 {
     string ret = "Team CodeCraft: ";
     ret += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
-    ret += "write: write {value} to {address}\n";
-    ret += "read: read from {address}\n";
-    ret += "fullwrite: write {value} to 0 ~ 99\n";
-    ret += "fullread: read from all 0 ~ 99\n";
-    ret += "help: print this message\n";
-    ret += "exit: exit TestShell\n";
+    ret += "write [LBA] [Value] \t\t: write [Value] to [LBA]\n";
+    ret += "read [LBA] \t\t\t: read from [LBA]\n";
+    ret += "fullwrite [Value] \t\t: write [Value] to 0 ~ 99\n";
+    ret += "fullread \t\t\t: read from all LBA (0 ~ 99)\n";
+    ret += "erase [LBA] [SIZE] \t\t: erase Value starting at the [LBA] for the given [SIZE]\n";
+    ret += "erase_range [startLBA] [endLBA] : erase Value ranging from the [startLBA] to the [endLBA]\n";
+    ret += "flush \t\t\t\t: run and clear the command buffer\n";
+    ret += "help \t\t\t\t: how to use the shell\n";
+    ret += "exit \t\t\t\t: exit TestShell\n";
     logger.Print("TestShell.help()", ret);
     return ret;
 }
