@@ -17,14 +17,14 @@ void TestScriptRunner::txtFileTestRun(string filename)
 
     for (auto cmd : cmds) {
         if (!isTestScript(cmd)) {
-            std::cout << "INVALID COMMAND\n";
+            std::cout << "INVALID SCRIPT\n";
             logger.Print("TestScriptRunner.txtFileTestRun()", "CMD is Not in TestScript : " + cmd);
-            continue;
+            return;
         }
         std::cout << cmd << "\t___\tRun...";
         if (testRun(cmd) != "PASS") {
             std::cout << "Fail!\n";
-            break;
+            return;
         }
         std::cout << "Pass\n";
     }
