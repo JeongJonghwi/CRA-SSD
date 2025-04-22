@@ -21,10 +21,29 @@ string randomValue()
     return hexStr;
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
     RealSSD ssd;
     TestShell test_shell(&ssd);
+    TestScriptRunner runner(&ssd);
+
+    if (argc > 1) {
+        if (argc != 2) {
+            std::cout << "Invalid arguments" << std::endl;
+            return 0;
+        }
+
+        FILE* file = nullptr;
+        errno_t err = fopen_s(&file, argv[1], "r");
+
+        if (err != 0 || file == nullptr) {
+            std::cout << "Invalid test script" << std::endl;
+            return 0;
+        }
+
+        runner.txtFileTestRun(argv[1]);
+        return 0;
+    }
 
     while (1) {
         string input;
@@ -32,7 +51,6 @@ int main(void)
         std::getline(std::cin, input);
 
         CMD cmd;
-        TestScriptRunner runner(&ssd);
 
         if (cmd.validCheck(input)) {
             string command = cmd.getCommand();
@@ -58,8 +76,6 @@ int main(void)
             }
         } else if (runner.isTestScript(input)) {
             std::cout << runner.testRun(input) << std::endl;
-        } else if (runner.isTestFile(input)) {
-            runner.txtFileTestRun(input);
         } else
             std::cout << "INVALID COMMAND" << std::endl;
     }
