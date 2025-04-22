@@ -27,15 +27,7 @@ int main(int argc, char* argv[])
     switch (cmd) {
     case READ:
     {
-        uint32_t readValue;
-        if (buffermanager.FastRead(lba, readValue)) {
-            if (ssd.WriteToOutputFile(readValue) == false) {
-                return 0;
-            }
-        }
-        else {
-            ssd.Read(lba);
-        }
+        buffermanager.FastRead(lba);
         break;
     }
     case WRITE:
@@ -89,15 +81,7 @@ int main(int argc, char* argv[])
     switch (cmd) {
     case READ:
     {
-        uint32_t readValue;
-        if (buffermanager.FastRead(lba, readValue)) {
-            if (ssd.WriteToOutputFile(readValue) == false) {
-                return 0;
-            }
-        }
-        else {
-            ssd.Read(lba);
-        }
+        buffermanager.FastRead(lba);
         break;
     }
     case WRITE:
@@ -112,6 +96,9 @@ int main(int argc, char* argv[])
         }
         buffermanager.AddErase(lba, value);
         break;
+    }
+    case FLUSH: {
+        buffermanager.Flush();
     }
     }
 

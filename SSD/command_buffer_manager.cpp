@@ -19,25 +19,25 @@ CommandBufferManager::CommandBufferManager(SSD* ssd)
     }
 }
 
-bool CommandBufferManager::FastRead(uint32_t lba, uint32_t& readValue)
+void CommandBufferManager::FastRead(uint32_t lba)
 {
     for (const auto& command : commands)
     {
         if (command.type == WRITE) {
             if (command.lba == lba) {
-                readValue = command.value;
-                return true;
+                ssd->WriteToOutputFile(command.value);
+                return;
             }
         }
         else if (command.type == ERASE) {
             if (lba >= command.lba && lba <= command.GetEnd()) {
-                readValue = 0;
-                return true;
+                ssd->WriteToOutputFile(0);
+                return;
             }
         }
     }
     
-    return false;
+    ssd->Read(lba);
 }
 
 void CommandBufferManager::AddWrite(uint32_t lba, uint32_t value)
