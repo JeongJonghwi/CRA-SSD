@@ -14,9 +14,9 @@ int main(void)
 #else
 int main(int argc, char* argv[])
 {
-    SSD ssd;
+    SSD& ssd = SSD::GetInstance();
     CmdType cmd;
-    CommandBufferManager buffermanager { &ssd };
+    CommandBufferManager& buffermanager = CommandBufferManager::GetInstance();
     uint32_t lba, value;
 
     if (ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {
@@ -65,9 +65,10 @@ int main(int argc, char* argv[])
         argv[argc] = input[argc];
         argc++;
     }
-    SSD ssd;
+
+    SSD& ssd = SSD::GetInstance();
     CmdType cmd;
-    CommandBufferManager buffermanager { &ssd };
+    CommandBufferManager& buffermanager = CommandBufferManager::GetInstance();
     uint32_t lba, value;
 
     if (ssd.ValidCheckAndCastType(argc, argv, &cmd, &lba, &value) == false) {

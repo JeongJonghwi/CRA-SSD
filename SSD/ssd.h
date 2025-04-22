@@ -29,9 +29,7 @@ const string cmd_symbol[CMD_COUNT] = { "R", "W", "E", "F" };
 
 class SSD {
 public:
-    explicit SSD();
-    SSD(const SSD& ssd) = delete;
-    SSD& operator=(const SSD& ssd) = delete;
+    static SSD& GetInstance();
 
     bool ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value);
     bool WriteToOutputFileError();
@@ -40,9 +38,13 @@ public:
     bool Write(uint32_t lba, uint32_t value);
     bool Erase(uint32_t lba, uint32_t count);
 
-    static CmdType GetCmdType(const string& str);
+    CmdType GetCmdType(const string& str);
 
 private:
+    explicit SSD();
+    SSD(const SSD& ssd) = delete;
+    SSD& operator=(const SSD& ssd) = delete;
+
     void InitializeNandFile();
 
     bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd);
