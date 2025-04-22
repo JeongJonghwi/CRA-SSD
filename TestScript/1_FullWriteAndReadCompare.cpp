@@ -1,7 +1,7 @@
+#include "Logger.h"
 #include "pch.h"
 #include "ssd_interface.h"
 #include "test_script_interface.h"
-#include "Logger.h"
 
 #include <iomanip>
 #include <iostream>
@@ -27,6 +27,9 @@ public:
         return "PASS";
     }
 
+private:
+    SSD* ssd;
+
     string groupWriteAndReadCompare(Logger* logger, int startAddr, int endAddr, string value)
     {
         for (int addr = startAddr; addr < endAddr; addr++) {
@@ -44,9 +47,6 @@ public:
         }
         return "PASS";
     }
-
-private:
-    SSD* ssd;
 };
 
 extern "C" __declspec(dllexport) ITestScript* CreateScript_1_(SSD* ssd)
