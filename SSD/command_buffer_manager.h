@@ -33,7 +33,7 @@ struct Command {
 class CommandBufferManager {
 public:
     CommandBufferManager(SSD* ssd);
-    bool FastRead(uint32_t lba, uint32_t& readValue);
+    void FastRead(uint32_t lba);
     void AddWrite(uint32_t lba, uint32_t value);
     void AddErase(uint32_t lba, uint32_t value);
     bool Flush();
