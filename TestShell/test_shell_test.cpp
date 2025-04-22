@@ -153,12 +153,15 @@ TEST_F(ShellTestFixture, helpTest)
 {
     string expected = "Team CodeCraft: ";
     expected += "강동현, 김태완, 유현승, 이수지, 정종휘\n";
-    expected += "write: write {value} to {address}\n";
-    expected += "read: read from {address}\n";
-    expected += "fullwrite: write {value} to 0 ~ 99\n";
-    expected += "fullread: read from all 0 ~ 99\n";
-    expected += "help: print this message\n";
-    expected += "exit: exit TestShell\n";
+    expected += "write [LBA] [Value] \t\t: write [Value] to [LBA]\n";
+    expected += "read [LBA] \t\t\t: read from [LBA]\n";
+    expected += "fullwrite [Value] \t\t: write [Value] to 0 ~ 99\n";
+    expected += "fullread \t\t\t: read from all LBA (0 ~ 99)\n";
+    expected += "erase [LBA] [SIZE] \t\t: erase Value starting at the [LBA] for the given [SIZE]\n";
+    expected += "erase_range [startLBA] [endLBA] : erase Value ranging from the [startLBA] to the [endLBA]\n";
+    expected += "flush \t\t\t\t: run and clear the command buffer\n";
+    expected += "help \t\t\t\t: how to use the shell\n";
+    expected += "exit \t\t\t\t: exit TestShell\n";
 
     EXPECT_EQ(expected, ts.help());
 }
