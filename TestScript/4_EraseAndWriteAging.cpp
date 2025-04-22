@@ -1,5 +1,5 @@
-#include "Logger.h"
 #include "pch.h"
+#include "Logger.h"
 #include "ssd_interface.h"
 #include "test_script_interface.h"
 
