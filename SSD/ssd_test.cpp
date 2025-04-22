@@ -33,8 +33,7 @@ public:
 protected:
     void TearDown() override
     {
-        remove(SSD_NAND_FILE_NAME);
-        remove(SSD_OUTPUT_FILE_NAME);
+        ssd.InitializeNandFile();
     }
 };
 

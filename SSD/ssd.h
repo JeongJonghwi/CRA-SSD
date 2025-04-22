@@ -32,6 +32,7 @@ public:
     static SSD& GetInstance();
 
     bool ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT uint32_t* lba, OUT uint32_t* value);
+    void InitializeNandFile();
     bool WriteToOutputFileError();
     bool WriteToOutputFile(uint32_t readValue);
     bool Read(uint32_t lba);
@@ -44,8 +45,6 @@ private:
     explicit SSD();
     SSD(const SSD& ssd) = delete;
     SSD& operator=(const SSD& ssd) = delete;
-
-    void InitializeNandFile();
 
     bool CheckCMDandNumofParam(int argc, char* argv[], OUT CmdType* cmd);
     bool CheckLBA(int argc, char* argv[], OUT uint32_t* lba);
