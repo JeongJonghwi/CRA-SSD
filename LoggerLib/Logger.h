@@ -8,6 +8,8 @@ using std::string;
 class Logger {
 public:
     virtual ~Logger();
+    Logger(const Logger& logger) = delete;
+    Logger& operator=(Logger& logger) = delete;
     void Print(const string& logingFunctionStr, const string& loggingMessage);
     void CloseLogger();
     static Logger& getInstance();
