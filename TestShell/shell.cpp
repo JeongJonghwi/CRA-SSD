@@ -74,6 +74,12 @@ string TestShell::erase(int address, int size)
     return "Done";
 }
 
+string TestShell::flush()
+{
+    ssd->flush();
+    return "Done";
+}
+
 bool TestShell::isValidCommandAndArgument(string command)
 {
     CMD cmd;

@@ -49,6 +49,8 @@ int main(void)
                 std::cout << test_shell.erase(cmd.getAddress(), cmd.getSize()) << std::endl;
             } else if (command == "erase_range") {
                 std::cout << test_shell.erase(cmd.getAddress(), cmd.getSize()) << std::endl;
+            } else if (command == "flush") {
+                std::cout << test_shell.flush() << std::endl;
             } else if (command == "help") {
                 std::cout << test_shell.help() << std::endl;
             } else if (command == "exit") {
