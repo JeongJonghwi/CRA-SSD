@@ -92,4 +92,4 @@ cd CRA-SSD
 
 - `LoggerLib`는 정적 라이브러리로, 모든 프로젝트에서 공통적으로 사용됩니다.
 - latest.log 은 TestShell 이 실행되는 동안에는 읽기가 불가능 합니다. 이전 로그 또는 압축된 로그는 TestShell 실행 중에도 읽기가 가능합니다.
-- SSD 프로그램에서는 CommandBuffer를 통해 성능을 높이고 있으며, Buffer 폴더 내에 CommandBuffer 파일들이 생성되게 됩니다. 파일명은 (1~5)(W or E)(lba)_(value)의 형태를 가지고 있으며, value는 사용자 입력 포맷과는 달리 10진수 기준으로 관리됩니다. 
+- SSD 프로그램에서는 CommandBuffer를 통해 성능을 높이고 있으며, Buffer 폴더 내에 CommandBuffer 파일들이 생성되게 됩니다. 파일명은 (1~5)_(W or E)_(lba)_(value)의 형태를 가지고 있으며, value는 사용자 입력 포맷과는 달리 10진수 기준으로 관리됩니다. 
