@@ -151,7 +151,6 @@
   <ItemGroup>
     <ClCompile Include="3_WriteReadAging.cpp" />
     <ClCompile Include="4_EraseAndWriteAging.cpp" />
-    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="1_FullWriteAndReadCompare.cpp" />
     <ClCompile Include="2_PartialLBAWrite.cpp" />
     <ClCompile Include="pch.cpp">
