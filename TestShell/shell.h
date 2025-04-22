@@ -21,6 +21,7 @@ public:
     string fullWrite(string value);
     string fullRead();
     string erase(int address, int size);
+    string flush();
     bool isValidCommandAndArgument(string command);
 
 private:
