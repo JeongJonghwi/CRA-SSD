@@ -53,7 +53,7 @@ bool SSD::ValidCheckAndCastType(int argc, char* argv[], OUT CmdType* cmd, OUT ui
 
     if (*cmd == WRITE) {
         valid = valid && CheckValue(argc, argv, value);
-    } else {    // ERASE
+    } else { // ERASE
         valid = valid && CheckCount(argc, argv, value);
     }
 
@@ -161,7 +161,7 @@ CmdType SSD::GetCmdType(const string& str)
 {
     CmdType ret = INVALID_CMD;
 
-    for (int type=CMD_START; type<CMD_COUNT; type++) {
+    for (int type = CMD_START; type < CMD_COUNT; type++) {
         if (cmd_symbol[type] == str) {
             ret = static_cast<CmdType>(type);
         }
@@ -170,7 +170,8 @@ CmdType SSD::GetCmdType(const string& str)
     return ret;
 }
 
-void SSD::InitializeNandFile() {
+void SSD::InitializeNandFile()
+{
     FILE* fp = nullptr;
 
     if ((fopen_s(&fp, SSD_NAND_FILE_NAME, "wb+")) != 0) {
