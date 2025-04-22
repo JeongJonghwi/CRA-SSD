@@ -8,15 +8,15 @@ using std::string;
 class Logger {
 public:
     virtual ~Logger();
-    Logger(const Logger& logger) = delete;
-    Logger& operator=(Logger& logger) = delete;
     void Print(const string& logingFunctionStr, const string& loggingMessage);
-    void CloseLogger();
     static Logger& getInstance();
 
 private:
-    Logger();
+    explicit Logger();
+    Logger(const Logger& logger) = delete;
+    Logger& operator=(const Logger& logger) = delete;
     bool OpenLastLogFile();
+    void CloseLogger();
     bool IsOverLogFileSize() const;
     void FindFilesWithExtension(const string& folderPath, const string& extension);
     bool BackupLogFile();
