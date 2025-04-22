@@ -1,7 +1,7 @@
+#include "Logger.h"
 #include "real_ssd.h"
 #include "shell.h"
 #include "testscript_runner.h"
-#include "Logger.h"
 
 #ifdef _DEBUG
 #include "gmock/gmock.h"

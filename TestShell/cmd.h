@@ -1,8 +1,8 @@
 #pragma once
+#include "Logger.h"
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Logger.h"
 
 using std::string;
 using std::vector;
@@ -13,7 +13,7 @@ public:
         : input { "" }
         , address { 0 }
         , data { "" }
-        , size { 0 } {};
+        , size { 0 } { };
 
     bool validCheck(string command);
 

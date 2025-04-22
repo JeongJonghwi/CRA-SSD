@@ -1,11 +1,10 @@
 #pragma once
+#include "Logger.h"
 #include "cmd.h"
 #include "ssd_interface.h"
 #include "gmock/gmock.h"
 #include <string>
 #include <vector>
-
-#include "Logger.h"
 
 class TestShell {
 public:
@@ -13,7 +12,7 @@ public:
         : ssd(ssd)
     {
     }
-    virtual ~TestShell() {}
+    virtual ~TestShell() { }
     string read(uint32_t address);
     string write(uint32_t address, string value);
     string help();
